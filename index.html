@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OGE / EGO TV</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--red:#FF1A1A;--black:#000;--white:#fff;--mono:'Space Mono',monospace;--display:'Bebas Neue',sans-serif;}
+html,body{width:100%;height:100%;overflow:hidden;}
+body{background:var(--black);font-family:var(--display);cursor:crosshair;}
+
+.root{width:100%;height:100vh;position:relative;overflow:hidden;}
+.split{display:flex;width:100%;height:100%;position:relative;}
+.side{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;transition:flex 0.55s cubic-bezier(0.77,0,0.18,1);}
+.split.teaser-left .side-left{flex:1.25;}
+.split.teaser-left .side-right{flex:0.75;}
+.split.teaser-right .side-right{flex:1.25;}
+.split.teaser-right .side-left{flex:0.75;}
+.side-left{background:#fff;}
+.side-right{background:#000;}
+
+.content{position:relative;z-index:4;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;transition:opacity 0.4s,transform 0.4s;pointer-events:none;}
+.split.teaser-right .side-left .content{opacity:0.3;transform:translateX(-8px);}
+.split.teaser-left .side-right .content{opacity:0.3;transform:translateX(8px);}
+
+.eyebrow{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.35em;text-transform:uppercase;}
+.side-left .eyebrow{color:#555;}
+.side-right .eyebrow{color:rgba(255,26,26,0.7);}
+
+.big-name{font-size:clamp(4rem,9vw,6rem);letter-spacing:0.06em;line-height:0.9;transition:letter-spacing 0.4s;}
+.side-left .big-name{color:#0a0a0a;}
+.side-right .big-name{color:var(--red);}
+.split.teaser-left .side-left .big-name{letter-spacing:0.14em;}
+.split.teaser-right .side-right .big-name{letter-spacing:0.14em;}
+
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.tag{font-family:var(--mono);font-size:0.45rem;letter-spacing:0.2em;text-transform:uppercase;padding:3px 8px;border:1px solid;}
+.side-left .tag{border-color:#aaa;color:#444;}
+.side-right .tag{border-color:rgba(255,26,26,0.3);color:rgba(255,255,255,0.45);}
+
+.cta-hint{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.25em;text-transform:uppercase;padding-bottom:2px;opacity:0;transform:translateY(8px);transition:opacity 0.3s,transform 0.3s;margin-top:4px;}
+.side-left .cta-hint{color:#0a0a0a;border-bottom:1px solid #0a0a0a;}
+.side-right .cta-hint{color:var(--red);border-bottom:1px solid var(--red);}
+.split.teaser-left .side-left .cta-hint,
+.split.teaser-right .side-right .cta-hint{opacity:1;transform:translateY(0);}
+
+.ego-logo{width:70px;height:70px;object-fit:contain;transition:transform 0.4s;}
+.split.teaser-right .side-right .ego-logo{transform:scale(1.08);}
+
+.divider{position:absolute;top:0;bottom:0;width:2px;background:#222;z-index:10;pointer-events:none;transform:translateX(-50%);left:50%;}
+
+canvas.java-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;}
+canvas.ego-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;}
+
+.bottom-label{position:absolute;bottom:14px;font-family:var(--mono);font-size:0.45rem;letter-spacing:0.3em;text-transform:uppercase;z-index:5;pointer-events:none;transition:opacity 0.3s;}
+.side-left .bottom-label{color:#888;}
+.side-right .bottom-label{color:rgba(255,255,255,0.3);}
+.split.teaser-right .side-left .bottom-label{opacity:0.3;}
+.split.teaser-left .side-right .bottom-label{opacity:0.3;}
+
+.curtain-panel{position:absolute;top:0;bottom:0;z-index:20;transition:width 0.65s cubic-bezier(0.77,0,0.18,1);width:0;overflow:hidden;}
+.curtain-left{left:0;background:#111;}
+.curtain-right{right:0;background:#111;}
+.root.taken-left .curtain-right{width:100%;}
+.root.taken-right .curtain-left{width:100%;}
+
+.taken-screen{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;opacity:0;pointer-events:none;transition:opacity 0.25s 0.5s;}
+.taken-screen.oge-screen{background:#111;}
+.taken-screen.ego-screen{background:#000;}
+.root.taken-left .taken-screen.oge-screen,
+.root.taken-right .taken-screen.ego-screen{opacity:1;pointer-events:all;}
+
+.taken-screen .big-name{font-size:clamp(5rem,12vw,8rem);}
+.taken-screen.oge-screen .big-name{color:#fff;}
+.taken-screen.ego-screen .big-name{color:var(--red);}
+.taken-screen .sub{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.3em;text-transform:uppercase;}
+.taken-screen.oge-screen .sub{color:rgba(255,255,255,0.45);}
+.taken-screen.ego-screen .sub{color:rgba(255,255,255,0.4);}
+.ego-logo-big{width:100px;height:100px;object-fit:contain;}
+
+.back-btn{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.25em;text-transform:uppercase;padding:10px 20px;cursor:crosshair;background:transparent;transition:background 0.2s;margin-top:4px;}
+.oge-screen .back-btn{border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.5);}
+.oge-screen .back-btn:hover{background:rgba(255,255,255,0.06);}
+.ego-screen .back-btn{border:1px solid rgba(255,26,26,0.4);color:var(--red);}
+.ego-screen .back-btn:hover{background:rgba(255,26,26,0.08);}
+
+.enter-btn{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;padding:10px 22px;cursor:crosshair;transition:background 0.2s;border:none;text-decoration:none;display:inline-block;}
+.oge-screen .enter-btn{background:#fff;color:#111;}
+.oge-screen .enter-btn:hover{background:#ddd;}
+.ego-screen .enter-btn{background:var(--red);color:#000;}
+.ego-screen .enter-btn:hover{background:#ff3333;}
+
+.taken-screen .inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:16px;}
+.eyebrow-taken{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.35em;text-transform:uppercase;}
+.oge-screen .eyebrow-taken{color:rgba(255,255,255,0.4);}
+.ego-screen .eyebrow-taken{color:rgba(255,26,26,0.6);}
+</style>
+</head>
+<body>
+
+<div class="root" id="root">
+  <div class="split" id="split">
+
+    <div class="side side-left" id="sideLeft">
+      <canvas class="java-canvas" id="javaCanvas"></canvas>
+      <div class="content">
+        <div class="eyebrow">Developer &amp; Engineer</div>
+        <div class="big-name" id="leftName">OGE</div>
+        <div class="tags">
+          <span class="tag">Web Dev</span>
+          <span class="tag">Data Analysis</span>
+          <span class="tag">Business Analysis</span>
+        </div>
+        <div class="cta-hint">Click to Enter</div>
+      </div>
+      <div class="bottom-label">BSc CS &amp; Business Computing · UCT 2026</div>
+    </div>
+
+    <div class="divider" id="divider"></div>
+
+    <div class="side side-right" id="sideRight">
+      <canvas class="ego-canvas" id="egoCanvas"></canvas>
+      <div class="content">
+        <div class="eyebrow">Creative Agency · ZA</div>
+        <img class="ego-logo" src="assets/egotv_logo.jpg" alt="EGO TV logo">
+        <div class="big-name" id="rightName">EGO TV</div>
+        <div class="tags">
+          <span class="tag">Photo</span>
+          <span class="tag">Video</span>
+          <span class="tag">Web</span>
+        </div>
+        <div class="cta-hint">Click to Enter</div>
+      </div>
+      <div class="bottom-label">egotv777.com</div>
+    </div>
+
+  </div>
+
+  <div class="curtain-panel curtain-left"></div>
+  <div class="curtain-panel curtain-right"></div>
+
+  <div class="taken-screen oge-screen" id="ogeScreen">
+    <div class="inner">
+      <div class="eyebrow-taken">Developer &amp; Engineer</div>
+      <div class="big-name">OGE</div>
+      <div class="sub">Portfolio</div>
+      <a href="oge.html" class="enter-btn">View Portfolio →</a>
+      <button class="back-btn" id="backFromOge">← Back</button>
+    </div>
+  </div>
+
+  <div class="taken-screen ego-screen" id="egoScreen">
+    <div class="inner">
+      <img class="ego-logo-big" src="assets/egotv_logo.jpg" alt="EGO TV">
+      <div class="big-name">EGO TV</div>
+      <div class="sub">Creative Agency · Centurion ZA</div>
+      <a href="egotv.html" class="enter-btn">Enter Agency →</a>
+      <button class="back-btn" id="backFromEgo">← Back</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const root       = document.getElementById('root');
+const split      = document.getElementById('split');
+const sideL      = document.getElementById('sideLeft');
+const sideR      = document.getElementById('sideRight');
+const leftName   = document.getElementById('leftName');
+const rightName  = document.getElementById('rightName');
+const javaCanvas = document.getElementById('javaCanvas');
+const egoCanvas  = document.getElementById('egoCanvas');
+const divider    = document.getElementById('divider');
+
+const EASE_DUR = 550;
+function cubicInOut(t){ return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2; }
+let divAnim=null, currentPct=50;
+
+function animateDivider(fromPct,toPct){
+  cancelAnimationFrame(divAnim);
+  const start=performance.now();
+  function tick(now){
+    const t=Math.min((now-start)/EASE_DUR,1);
+    const pct=fromPct+(toPct-fromPct)*cubicInOut(t);
+    divider.style.left=pct+'%';
+    currentPct=pct;
+    if(t<1) divAnim=requestAnimationFrame(tick);
+  }
+  divAnim=requestAnimationFrame(tick);
+}
+
+const CHARS='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%';
+function scrambleTo(el,target,color,duration){
+  clearInterval(el._scramble);
+  el.style.color=color;
+  let frame=0;
+  const totalFrames=Math.round(duration/40);
+  el._scramble=setInterval(()=>{
+    frame++;
+    const progress=frame/totalFrames;
+    let result='';
+    for(let i=0;i<target.length;i++) result+=progress>i/target.length?target[i]:CHARS[Math.random()*CHARS.length|0];
+    el.textContent=result;
+    if(frame>=totalFrames){clearInterval(el._scramble);el.textContent=target;}
+  },40);
+}
+function resetName(el,target,color){clearInterval(el._scramble);el.textContent=target;el.style.color=color;}
+
+const javaSnippets=[
+  'public class Main{','void render()','String[] args','System.out.println','new ArrayList<>()',
+  'interface Shape','extends Object','implements Runnable','try { catch(e)','return this;',
+  'HashMap<K,V>','for(int i=0;','while(!done)','@Override','private final',
+  'static void main','throw new Error','import java.util','boolean isValid','super.init()'
+];
+
+let javaTimer=null,egoTimer=null;
+
+function startJava(){
+  const w=sideL.offsetWidth,h=sideL.offsetHeight;
+  javaCanvas.width=w;javaCanvas.height=h;
+  const ctx=javaCanvas.getContext('2d');
+  const particles=Array.from({length:22},()=>({
+    x:Math.random()*w,y:Math.random()*h,
+    vy:0.4+Math.random()*0.7,vx:(Math.random()-0.5)*0.25,
+    text:javaSnippets[Math.random()*javaSnippets.length|0],
+    alpha:0.22+Math.random()*0.25,size:10+(Math.random()*4|0)
+  }));
+  clearInterval(javaTimer);
+  javaTimer=setInterval(()=>{
+    const cw=sideL.offsetWidth,ch=sideL.offsetHeight;
+    if(cw!==javaCanvas.width||ch!==javaCanvas.height){javaCanvas.width=cw;javaCanvas.height=ch;}
+    ctx.clearRect(0,0,cw,ch);
+    particles.forEach(p=>{
+      ctx.globalAlpha=p.alpha;ctx.fillStyle='#1a1a2e';
+      ctx.font=`700 ${p.size}px Space Mono,monospace`;
+      ctx.fillText(p.text,p.x,p.y);
+      p.y+=p.vy;p.x+=p.vx;
+      if(p.y>ch+20){p.y=-20;p.x=Math.random()*cw;p.text=javaSnippets[Math.random()*javaSnippets.length|0];p.alpha=0.22+Math.random()*0.25;}
+    });
+    ctx.globalAlpha=1;
+  },35);
+}
+function stopJava(){clearInterval(javaTimer);javaCanvas.getContext('2d').clearRect(0,0,javaCanvas.width,javaCanvas.height);}
+
+function startEgo(){
+  const ctx=egoCanvas.getContext('2d');
+  let frame=0;
+  clearInterval(egoTimer);
+  egoTimer=setInterval(()=>{
+    frame++;
+    const cw=sideR.offsetWidth,ch=sideR.offsetHeight;
+    if(cw!==egoCanvas.width||ch!==egoCanvas.height){egoCanvas.width=cw;egoCanvas.height=ch;}
+    ctx.fillStyle='rgba(0,0,0,0.45)';ctx.fillRect(0,0,cw,ch);
+    const flicker=0.72+Math.sin(frame*0.13)*0.14+(Math.random()-0.5)*0.07;
+    ctx.globalAlpha=flicker*0.22;ctx.fillStyle='#ff2200';ctx.fillRect(0,0,cw,ch);ctx.globalAlpha=1;
+    const numBands=Math.random()>0.55?1+(Math.random()*3|0):0;
+    for(let b=0;b<numBands;b++){
+      const y=Math.random()*ch,bh=Math.max(1,2+Math.random()*10|0),shift=(Math.random()-0.5)*24;
+      try{const id=ctx.getImageData(0,y|0,cw,bh);ctx.putImageData(id,shift,y|0);}catch(e){}
+      ctx.fillStyle=`rgba(255,26,26,${0.06+Math.random()*0.09})`;ctx.fillRect(0,y,cw,bh);
+    }
+    if(Math.random()>0.78){const y=Math.random()*ch;ctx.fillStyle=`rgba(255,255,255,${0.025+Math.random()*0.05})`;ctx.fillRect(0,y,cw,1+Math.random()*2);}
+    ctx.fillStyle='rgba(0,0,0,0.22)';for(let y=0;y<ch;y+=3)ctx.fillRect(0,y,cw,1);
+    if(Math.random()>0.91){ctx.fillStyle='rgba(255,26,26,0.06)';ctx.fillRect(0,0,cw,ch);}
+    const grad=ctx.createRadialGradient(cw/2,ch/2,10,cw/2,ch/2,cw*0.8);
+    grad.addColorStop(0,'rgba(0,0,0,0)');grad.addColorStop(1,'rgba(0,0,0,0.65)');
+    ctx.fillStyle=grad;ctx.fillRect(0,0,cw,ch);
+  },50);
+}
+function stopEgo(){clearInterval(egoTimer);egoCanvas.getContext('2d').clearRect(0,0,egoCanvas.width,egoCanvas.height);}
+
+let locked=false;
+
+sideL.addEventListener('mouseenter',()=>{
+  if(locked)return;
+  split.classList.add('teaser-left');split.classList.remove('teaser-right');
+  animateDivider(currentPct,62.5);startJava();stopEgo();
+  scrambleTo(rightName,'OGE','#FF1A1A',550);
+});
+sideL.addEventListener('mouseleave',()=>{
+  if(locked)return;
+  split.classList.remove('teaser-left');
+  animateDivider(currentPct,50);stopJava();
+  resetName(rightName,'EGO TV','#FF1A1A');
+});
+sideR.addEventListener('mouseenter',()=>{
+  if(locked)return;
+  split.classList.add('teaser-right');split.classList.remove('teaser-left');
+  animateDivider(currentPct,37.5);startEgo();stopJava();
+  scrambleTo(leftName,'EGO','#FF1A1A',550);
+});
+sideR.addEventListener('mouseleave',()=>{
+  if(locked)return;
+  split.classList.remove('teaser-right');
+  animateDivider(currentPct,50);stopEgo();
+  resetName(leftName,'OGE','#0a0a0a');
+});
+sideL.addEventListener('click',()=>{
+  if(locked)return;locked=true;stopJava();stopEgo();root.classList.add('taken-left');
+});
+sideR.addEventListener('click',()=>{
+  if(locked)return;locked=true;stopJava();stopEgo();root.classList.add('taken-right');
+});
+
+function goBack(){
+  root.classList.remove('taken-left','taken-right');
+  split.classList.remove('teaser-left','teaser-right');
+  resetName(leftName,'OGE','#0a0a0a');
+  resetName(rightName,'EGO TV','#FF1A1A');
+  animateDivider(currentPct,50);locked=false;
+}
+document.getElementById('backFromOge').addEventListener('click',goBack);
+document.getElementById('backFromEgo').addEventListener('click',goBack);
+</script>
+</body>
+</html>
