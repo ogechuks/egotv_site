@@ -4,8 +4,342 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EGO TV — Creative Agency</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--red:#FF1A1A;--black:#000;--white:#f5f5f0;--gray:#888;--gray-dark:#111;--gray-mid:#1a1a1a;--mono:'Space Mono',monospace;--display:'Bebas Neue',sans-serif;}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--white);font-family:var(--mono);cursor:crosshair;overflow-x:hidden;}
+::selection{background:var(--red);color:var(--black);}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:999;opacity:0.3;mix-blend-mode:overlay;}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:1.25rem 2.5rem;border-bottom:1px solid rgba(255,26,26,0.12);background:rgba(0,0,0,0.88);backdrop-filter:blur(10px);}
+.nav-logo{font-family:var(--display);font-size:1.6rem;letter-spacing:0.1em;color:var(--white);text-decoration:none;}
+.nav-logo span{color:var(--red);}
+.nav-links{display:flex;gap:2rem;list-style:none;align-items:center;}
+.nav-links li{display:flex;align-items:center;}
+.nav-links a{font-size:0.52rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gray);text-decoration:none;transition:color 0.2s;line-height:1;}
+.nav-links a:hover{color:var(--red);}
+.nav-dropdown{position:relative;display:flex;align-items:center;}
+.nav-dropdown-toggle{font-size:0.52rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gray);cursor:pointer;transition:color 0.2s;display:flex;align-items:center;gap:0.35rem;background:none;border:none;font-family:var(--mono);padding:0;margin:0;line-height:1;}
+.nav-dropdown-toggle .arrow{font-size:0.45rem;transition:transform 0.2s;display:inline-block;line-height:1;}
+.nav-dropdown-toggle.open{color:var(--red);}
+.nav-dropdown-toggle.open .arrow{transform:rotate(180deg);}
+.nav-dropdown-menu{position:absolute;top:calc(100% + 1rem);left:50%;transform:translateX(-50%) translateY(-6px);background:rgba(0,0,0,0.97);border:1px solid rgba(255,26,26,0.2);backdrop-filter:blur(10px);min-width:160px;opacity:0;pointer-events:none;transition:opacity 0.2s,transform 0.2s;z-index:200;}
+.nav-dropdown-menu.open{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0);}
+.nav-dropdown-menu a{display:block;padding:0.75rem 1.2rem;font-size:0.5rem;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.5);text-decoration:none;transition:color 0.2s,background 0.2s;border-bottom:1px solid rgba(255,255,255,0.04);}
+.nav-dropdown-menu a:last-child{border-bottom:none;}
+.nav-dropdown-menu a:hover{color:var(--red);background:rgba(255,26,26,0.05);}
+.nav-back{font-size:0.52rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gray);text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:1px;transition:color 0.2s;}
+.nav-back:hover{color:var(--red);}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:8rem 2.5rem 4rem;position:relative;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;z-index:0;}
+.hero-bg canvas{position:absolute;inset:0;width:100%;height:100%;}
+.hero-bg-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.85) 100%);}
+.hero-content{position:relative;z-index:2;max-width:900px;}
+.hero-eyebrow{font-size:0.55rem;letter-spacing:0.35em;text-transform:uppercase;color:var(--red);margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;}
+.hero-eyebrow::before{content:'';width:28px;height:1px;background:var(--red);}
+.hero-title{font-family:var(--display);font-size:clamp(5rem,12vw,10rem);line-height:0.88;letter-spacing:0.02em;color:var(--white);margin-bottom:2rem;}
+.hero-title .red{color:var(--red);}
+.hero-sub{font-size:0.68rem;line-height:2;color:rgba(255,255,255,0.5);max-width:480px;margin-bottom:2.5rem;letter-spacing:0.04em;}
+.hero-cta{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;}
+.btn-red{background:var(--red);color:var(--black);border:none;padding:0.9rem 2rem;font-family:var(--mono);font-size:0.62rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;cursor:crosshair;text-decoration:none;transition:background 0.2s,transform 0.15s;display:inline-block;}
+.btn-red:hover{background:#ff3333;transform:translateY(-2px);}
+.btn-ghost{background:transparent;color:var(--white);border:1px solid rgba(255,255,255,0.2);padding:0.9rem 2rem;font-family:var(--mono);font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;cursor:crosshair;text-decoration:none;transition:border-color 0.2s,color 0.2s;display:inline-block;}
+.btn-ghost:hover{border-color:var(--red);color:var(--red);}
+.hero-scroll{position:absolute;bottom:2rem;right:2.5rem;z-index:2;display:flex;flex-direction:column;align-items:center;gap:0.5rem;}
+.hero-scroll span{font-size:0.45rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,0.25);writing-mode:vertical-rl;}
+.hero-scroll-line{width:1px;height:50px;background:linear-gradient(to bottom,rgba(255,26,26,0.6),transparent);animation:scroll-line 1.8s ease-in-out infinite;}
+@keyframes scroll-line{0%{transform:scaleY(0);transform-origin:top;}50%{transform:scaleY(1);transform-origin:top;}51%{transform-origin:bottom;}100%{transform:scaleY(0);transform-origin:bottom;}}
+.ticker{border-top:1px solid rgba(255,26,26,0.15);border-bottom:1px solid rgba(255,26,26,0.15);padding:0.7rem 0;overflow:hidden;background:rgba(255,26,26,0.03);}
+.ticker-inner{display:flex;gap:2.5rem;animation:ticker 22s linear infinite;white-space:nowrap;}
+.ticker-item{font-size:0.58rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gray);flex-shrink:0;}
+.ticker-item span{color:var(--red);margin-right:0.75rem;}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.about{padding:5rem 2.5rem;background:var(--gray-dark);border-bottom:1px solid rgba(255,255,255,0.04);}
+.about-inner{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;}
+.eyebrow{font-size:0.52rem;letter-spacing:0.35em;text-transform:uppercase;color:var(--red);margin-bottom:0.75rem;display:flex;align-items:center;gap:0.65rem;}
+.eyebrow::before{content:'';width:20px;height:1px;background:var(--red);}
+.section-title{font-family:var(--display);font-size:clamp(2.8rem,5vw,4.5rem);line-height:0.92;letter-spacing:0.03em;margin-bottom:2rem;}
+.about-bio{font-size:0.65rem;line-height:2.2;color:rgba(255,255,255,0.55);letter-spacing:0.03em;}
+.about-bio strong{color:var(--white);}
+.about-bio p{margin-bottom:1rem;}
+.about-bio p:last-child{margin-bottom:0;}
+.about-right{display:flex;flex-direction:column;gap:0;}
+.about-stat{padding:1.5rem 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+.about-stat:first-child{border-top:1px solid rgba(255,255,255,0.06);}
+.about-stat-num{font-family:var(--display);font-size:3.5rem;color:var(--red);line-height:1;letter-spacing:0.05em;}
+.about-stat-label{font-size:0.5rem;letter-spacing:0.25em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-top:0.3rem;}
+.services{padding:5rem 2.5rem;background:var(--black);}
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.04);}
+.service-card{background:var(--black);padding:2.5rem 2rem;position:relative;overflow:hidden;transition:background 0.3s;}
+.service-card::before{content:'';position:absolute;top:0;left:0;width:2px;height:0;background:var(--red);transition:height 0.4s ease;}
+.service-card:hover{background:rgba(255,26,26,0.03);}
+.service-card:hover::before{height:100%;}
+.service-num{font-size:0.55rem;letter-spacing:0.3em;color:var(--red);margin-bottom:1.5rem;font-weight:700;}
+.service-name{font-family:var(--display);font-size:2rem;letter-spacing:0.05em;color:var(--white);margin-bottom:1rem;line-height:1;}
+.service-desc{font-size:0.62rem;line-height:1.95;color:rgba(255,255,255,0.45);letter-spacing:0.02em;}
+.service-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:1.25rem;}
+.service-tag{font-size:0.47rem;letter-spacing:0.15em;text-transform:uppercase;padding:2px 7px;border:1px solid rgba(255,26,26,0.2);color:rgba(255,26,26,0.6);}
+.portfolio{padding:5rem 2.5rem;background:var(--gray-dark);}
+.portfolio-grid{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:auto auto;gap:2px;margin-top:0;}
+.port-item{position:relative;overflow:hidden;background:var(--gray-mid);cursor:crosshair;}
+.port-item:first-child{grid-row:1/3;}
+.port-thumb{width:100%;height:100%;display:block;object-fit:cover;transition:transform 0.5s ease;min-height:238px;}
+.port-item:first-child .port-thumb{min-height:476px;}
+.port-item:hover .port-thumb{transform:scale(1.04);}
+.port-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.2) 50%,transparent 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:1.5rem;opacity:0;transition:opacity 0.35s;}
+.port-item:hover .port-overlay{opacity:1;}
+.port-tag{font-size:0.5rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--red);margin-bottom:0.3rem;}
+.port-title{font-family:var(--display);font-size:1.4rem;color:var(--white);letter-spacing:0.05em;}
+.port-play{width:40px;height:40px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;margin-bottom:0.75rem;}
+.port-play svg{fill:#fff;margin-left:3px;}
+.port-cta{margin-top:3rem;text-align:center;}
+.collabs{padding:3rem 2.5rem;border-top:1px solid rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.04);background:var(--black);}
+.collab-label{font-size:0.5rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,0.2);text-align:center;margin-bottom:1.5rem;}
+.collab-list{display:flex;justify-content:center;flex-wrap:wrap;gap:2.5rem;}
+.collab-item{font-family:var(--display);font-size:1.4rem;letter-spacing:0.08em;color:rgba(255,255,255,0.2);transition:color 0.2s;}
+.collab-item:hover{color:var(--red);}
+.contact{padding:6rem 2.5rem;background:var(--gray-dark);text-align:center;position:relative;overflow:hidden;}
+.contact-bg-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--display);font-size:18rem;color:rgba(255,26,26,0.03);white-space:nowrap;pointer-events:none;line-height:1;user-select:none;}
+.contact .eyebrow{justify-content:center;position:relative;z-index:1;}
+.contact .section-title{position:relative;z-index:1;margin-bottom:1.5rem;}
+.contact-sub{font-size:0.65rem;line-height:2;color:rgba(255,255,255,0.4);max-width:400px;margin:0 auto 2.5rem;position:relative;z-index:1;}
+.contact-links{display:flex;gap:1.25rem;justify-content:center;flex-wrap:wrap;position:relative;z-index:1;margin-top:1.5rem;}
+.contact-link{font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:2px;transition:color 0.2s,border-color 0.2s;}
+.contact-link:hover{color:var(--red);border-color:var(--red);}
+footer{padding:2rem 2.5rem;border-top:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
+.footer-logo{font-family:var(--display);font-size:1.1rem;letter-spacing:0.1em;color:var(--white);}
+.footer-logo span{color:var(--red);}
+.footer-copy{font-size:0.48rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.2);}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal.visible{opacity:1;transform:none;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:var(--black);}
+::-webkit-scrollbar-thumb{background:rgba(255,26,26,0.3);}
+</style>
 </head>
 <body>
-<!-- EGO TV agency page — coming next -->
+<nav class="nav">
+  <a class="nav-logo" href="index.html">EGO <span>TV</span></a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li class="nav-dropdown">
+      <button class="nav-dropdown-toggle" id="portfolioToggle">Portfolio <span class="arrow">▾</span></button>
+      <div class="nav-dropdown-menu" id="portfolioMenu">
+        <a href="video.html">Video</a>
+        <a href="photos.html">Photography</a>
+      </div>
+    </li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="index.html" class="nav-back">← Home</a>
+</nav>
+<section class="hero" id="hero">
+  <div class="hero-bg">
+    <canvas id="heroCrt"></canvas>
+    <div class="hero-bg-vignette"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Creative Agency · Johannesburg, South Africa</div>
+    <h1 class="hero-title">MADE TO<br><span class="red">CREATE.</span></h1>
+    <p class="hero-sub">Photography. Videography. Web. We build visual worlds for brands that refuse to be ignored.</p>
+    <div class="hero-cta">
+      <a href="video.html" class="btn-red">View Video Work</a>
+      <a href="#contact" class="btn-ghost">Start a Project</a>
+    </div>
+  </div>
+  <div class="hero-scroll"><span>Scroll</span><div class="hero-scroll-line"></div></div>
+</section>
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="ticker-item"><span>★</span>Photography</span>
+    <span class="ticker-item"><span>★</span>Videography</span>
+    <span class="ticker-item"><span>★</span>Web Development</span>
+    <span class="ticker-item"><span>★</span>Creative Direction</span>
+    <span class="ticker-item"><span>★</span>Brand Content</span>
+    <span class="ticker-item"><span>★</span>Spec Ads</span>
+    <span class="ticker-item"><span>★</span>Music Videos</span>
+    <span class="ticker-item"><span>★</span>Documentary</span>
+    <span class="ticker-item"><span>★</span>Photography</span>
+    <span class="ticker-item"><span>★</span>Videography</span>
+    <span class="ticker-item"><span>★</span>Web Development</span>
+    <span class="ticker-item"><span>★</span>Creative Direction</span>
+    <span class="ticker-item"><span>★</span>Brand Content</span>
+    <span class="ticker-item"><span>★</span>Spec Ads</span>
+    <span class="ticker-item"><span>★</span>Music Videos</span>
+    <span class="ticker-item"><span>★</span>Documentary</span>
+  </div>
+</div>
+<section class="about" id="about">
+  <div class="about-inner">
+    <div class="reveal">
+      <div class="eyebrow">Who We Are</div>
+      <h2 class="section-title">BUILT ON<br>ANALOGUE<br>SOUL.</h2>
+      <div class="about-bio">
+        <p>EGO TV is a creative agency out of Johannesburg, South Africa. We shoot, direct, and build — photography, video, and web work for brands and artists who care about how things look and feel.</p>
+        <p>The name comes from the founder, <strong>Oge</strong>. EGO is OGE in reverse. That tension — between identity and expression, between the person behind the lens and the world in front of it — is what drives the work.</p>
+        <p>We're drawn to grain, warmth, and the imperfect beauty of analogue media. Everything we make carries that DNA.</p>
+        <p style="margin-top:1.5rem;padding:1rem;border-left:2px solid var(--red);background:rgba(255,26,26,0.04);font-size:0.6rem;line-height:1.9;color:rgba(255,255,255,0.55);">Named to the <strong style="color:var(--white)">DC100 List</strong> — DC Shoes &amp; Creative Nestlings' Top 100 Creatives Pushing Youth Culture in South Africa, 2025.</p>
+      </div>
+    </div>
+    <div class="about-right reveal">
+      <div class="about-stat"><div class="about-stat-num">3+</div><div class="about-stat-label">Years of creative work</div></div>
+      <div class="about-stat"><div class="about-stat-num">20+</div><div class="about-stat-label">Projects delivered</div></div>
+      <div class="about-stat"><div class="about-stat-num">ZA</div><div class="about-stat-label">Based in Johannesburg, South Africa</div></div>
+    </div>
+  </div>
+</section>
+<section class="services" id="services">
+  <div class="reveal">
+    <div class="eyebrow">What We Do</div>
+    <h2 class="section-title">SERVICES.</h2>
+  </div>
+  <div class="services-grid reveal">
+    <div class="service-card">
+      <div class="service-num">01</div>
+      <div class="service-name">Photography</div>
+      <div class="service-desc">Editorial, portrait, event, and brand photography. Shot with intent — not just captured but composed, lit, and finished to say something specific.</div>
+      <div class="service-tags"><span class="service-tag">Editorial</span><span class="service-tag">Fashion</span><span class="service-tag">Events</span><span class="service-tag">Brand</span></div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">02</div>
+      <div class="service-name">Videography</div>
+      <div class="service-desc">Music videos, spec ads, event coverage, and documentary work. We bring analogue warmth to digital production — VHS soul, modern execution.</div>
+      <div class="service-tags"><span class="service-tag">Music Video</span><span class="service-tag">Spec Ads</span><span class="service-tag">Documentary</span><span class="service-tag">Events</span></div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">03</div>
+      <div class="service-name">Web Dev</div>
+      <div class="service-desc">Custom websites built from scratch. No templates, no page builders. Fast, clean, and designed to represent your brand the way it deserves to be represented.</div>
+      <div class="service-tags"><span class="service-tag">Portfolio Sites</span><span class="service-tag">Agency Sites</span><span class="service-tag">Landing Pages</span></div>
+    </div>
+  </div>
+</section>
+<section class="portfolio" id="work">
+  <div class="reveal">
+    <div class="eyebrow">Selected Work</div>
+    <h2 class="section-title">THE WORK.</h2>
+  </div>
+  <div class="portfolio-grid reveal">
+    <div class="port-item" onclick="window.open('https://www.youtube.com/watch?v=MTbd80RQ1I4','_blank')">
+      <img class="port-thumb" src="https://img.youtube.com/vi/MTbd80RQ1I4/maxresdefault.jpg" alt="TYLA - TRP Don GY" loading="lazy">
+      <div class="port-overlay">
+        <div class="port-play"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></div>
+        <div class="port-tag">Music Video · VHS</div>
+        <div class="port-title">TYLA — TRP Don GY</div>
+      </div>
+    </div>
+    <div class="port-item" id="converseItem">
+      <img class="port-thumb" id="converseThumbnail" src="" alt="Converse Spec Ad" loading="lazy">
+      <div class="port-overlay">
+        <div class="port-play"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></div>
+        <div class="port-tag">Spec Ad</div>
+        <div class="port-title">Converse Spec Ad</div>
+      </div>
+    </div>
+    <div class="port-item" id="kujengaItem">
+      <img class="port-thumb" id="kujengaThumbnail" src="" alt="Created to Create EP2 - Kujenga" loading="lazy">
+      <div class="port-overlay">
+        <div class="port-play"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></div>
+        <div class="port-tag">Documentary · Trailer</div>
+        <div class="port-title">Created to Create EP2 — Kujenga</div>
+      </div>
+    </div>
+  </div>
+  <div class="port-cta reveal"><a href="video.html" class="btn-red">View Full Video Portfolio →</a></div>
+</section>
+<div class="collabs reveal">
+  <div class="collab-label">Credits</div>
+  <div class="collab-list">
+    <span class="collab-item">Tony Gum</span>
+    <span class="collab-item">Billboard Africa</span>
+    <span class="collab-item">Verve Magazine</span>
+    <span class="collab-item">Connade</span>
+    <span class="collab-item">DC Shoes</span>
+    <span class="collab-item">Creative Nestlings</span>
+  </div>
+</div>
+<section class="contact" id="contact">
+  <div class="contact-bg-text">EGO</div>
+  <div class="eyebrow">Get In Touch</div>
+  <h2 class="section-title">GOT A PROJECT<br>IN <span style="color:var(--red)">MIND?</span></h2>
+  <p class="contact-sub">Based in Johannesburg, South Africa. Working everywhere. Whether it's a shoot, a site, or a full campaign — let's talk.</p>
+  <a href="mailto:info@egotv777.com" class="btn-red">Email Us</a>
+  <div class="contact-links">
+    <a href="https://instagram.com/__ego.tv" class="contact-link" target="_blank">Instagram</a>
+    <a href="video.html" class="contact-link">Video Portfolio</a>
+    <a href="oge.html" class="contact-link">OGE Portfolio</a>
+  </div>
+</section>
+<footer>
+  <div class="footer-logo">EGO <span>TV</span></div>
+  <span class="footer-copy">© 2026 EGO TV Pty Ltd · Johannesburg, South Africa</span>
+  <span class="footer-copy">egotv777.com</span>
+</footer>
+<script>
+// Dropdown toggle
+const portfolioToggle=document.getElementById('portfolioToggle');
+const portfolioMenu=document.getElementById('portfolioMenu');
+portfolioToggle.addEventListener('click',(e)=>{
+  e.stopPropagation();
+  portfolioToggle.classList.toggle('open');
+  portfolioMenu.classList.toggle('open');
+});
+document.addEventListener('click',()=>{
+  portfolioToggle.classList.remove('open');
+  portfolioMenu.classList.remove('open');
+});
+
+const canvas=document.getElementById('heroCrt');
+const ctx=canvas.getContext('2d');
+function resizeCrt(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCrt();window.addEventListener('resize',resizeCrt);
+let frame=0;
+setInterval(()=>{
+  frame++;const w=canvas.width,h=canvas.height;
+  ctx.fillStyle='rgba(0,0,0,0.4)';ctx.fillRect(0,0,w,h);
+  const flicker=0.75+Math.sin(frame*0.11)*0.12+(Math.random()-0.5)*0.06;
+  ctx.globalAlpha=flicker*0.18;ctx.fillStyle='#ff2200';ctx.fillRect(0,0,w,h);ctx.globalAlpha=1;
+  const nb=Math.random()>0.65?1+(Math.random()*2|0):0;
+  for(let b=0;b<nb;b++){
+    const y=Math.random()*h,bh=Math.max(1,2+Math.random()*8|0),shift=(Math.random()-0.5)*20;
+    try{const id=ctx.getImageData(0,y|0,w,bh);ctx.putImageData(id,shift,y|0);}catch(e){}
+    ctx.fillStyle=`rgba(255,26,26,${0.04+Math.random()*0.07})`;ctx.fillRect(0,y,w,bh);
+  }
+  if(Math.random()>0.82){const y=Math.random()*h;ctx.fillStyle=`rgba(255,255,255,${0.015+Math.random()*0.03})`;ctx.fillRect(0,y,w,1+Math.random()*2);}
+  ctx.fillStyle='rgba(0,0,0,0.18)';for(let y=0;y<h;y+=3)ctx.fillRect(0,y,w,1);
+  const grad=ctx.createRadialGradient(w/2,h/2,10,w/2,h/2,w*0.85);
+  grad.addColorStop(0,'rgba(0,0,0,0)');grad.addColorStop(1,'rgba(0,0,0,0.75)');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+},55);
+// Fetch Vimeo thumbnails
+async function loadVimeoThumb(vimeoId, imgId, itemId, linkUrl) {
+  try {
+    const res = await fetch(`https://vimeo.com/api/oembed.json?url=https://vimeo.com/${vimeoId}&width=800`);
+    const data = await res.json();
+    const img = document.getElementById(imgId);
+    if(img && data.thumbnail_url) {
+      img.src = data.thumbnail_url.replace(/_\d+x\d+/, '_800x450');
+    }
+    const item = document.getElementById(itemId);
+    if(item) item.style.cursor = 'crosshair';
+    item.addEventListener('click', () => window.open(linkUrl, '_blank'));
+  } catch(e) {
+    // fallback — keep dark background
+    const img = document.getElementById(imgId);
+    if(img) { img.style.display='none'; img.parentElement.style.background='#1a0000'; }
+  }
+}
+
+loadVimeoThumb('1198160211', 'converseThumbnail', 'converseItem', 'https://vimeo.com/1198160211');
+loadVimeoThumb('1198186202', 'kujengaThumbnail', 'kujengaItem', 'https://vimeo.com/1198186202');
+
+const reveals=document.querySelectorAll('.reveal');
+const ro=new IntersectionObserver((entries)=>{
+  entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('visible'),i*70);ro.unobserve(e.target);}});
+},{threshold:0.08});
+reveals.forEach(el=>ro.observe(el));
+</script>
 </body>
 </html>

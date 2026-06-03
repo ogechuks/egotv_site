@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EGO TV — Video Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--red:#FF1A1A;--black:#000;--white:#f5f5f0;--gray:#888;--gray-dark:#111;--gray-mid:#1a1a1a;--mono:'Space Mono',monospace;--display:'Bebas Neue',sans-serif;}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--white);font-family:var(--mono);cursor:crosshair;overflow-x:hidden;}
+::selection{background:var(--red);color:var(--black);}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:999;opacity:0.3;mix-blend-mode:overlay;}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:1.25rem 2.5rem;border-bottom:1px solid rgba(255,26,26,0.12);background:rgba(0,0,0,0.92);backdrop-filter:blur(10px);}
+.nav-logo{font-family:var(--display);font-size:1.6rem;letter-spacing:0.1em;color:var(--white);text-decoration:none;}
+.nav-logo span{color:var(--red);}
+.nav-back{font-size:0.52rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gray);text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:1px;transition:color 0.2s;}
+.nav-back:hover{color:var(--red);}
+
+/* HEADER */
+.page-header{padding:10rem 2.5rem 4rem;border-bottom:1px solid rgba(255,26,26,0.1);}
+.eyebrow{font-size:0.52rem;letter-spacing:0.35em;text-transform:uppercase;color:var(--red);margin-bottom:0.75rem;display:flex;align-items:center;gap:0.65rem;}
+.eyebrow::before{content:'';width:20px;height:1px;background:var(--red);}
+.page-title{font-family:var(--display);font-size:clamp(4rem,9vw,8rem);line-height:0.88;letter-spacing:0.02em;color:var(--white);margin-bottom:1.5rem;}
+.page-title span{color:var(--red);}
+.page-sub{font-size:0.65rem;line-height:2;color:rgba(255,255,255,0.45);max-width:560px;letter-spacing:0.03em;}
+
+/* FILTERS */
+.filters{padding:2rem 2.5rem;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;}
+.filters-label{font-size:0.48rem;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,255,255,0.2);margin-right:0.5rem;flex-shrink:0;}
+.filter-btn{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.2em;text-transform:uppercase;padding:0.55rem 1.1rem;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.45);background:transparent;cursor:pointer;transition:border-color 0.2s,color 0.2s,background 0.2s,transform 0.15s;position:relative;}
+.filter-btn::after{content:'';position:absolute;bottom:-1px;left:0;width:0;height:1px;background:var(--red);transition:width 0.25s ease;}
+.filter-btn:hover{border-color:rgba(255,26,26,0.5);color:rgba(255,255,255,0.8);transform:translateY(-1px);}
+.filter-btn:hover::after{width:100%;}
+.filter-btn.active{border-color:var(--red);color:var(--red);background:rgba(255,26,26,0.06);}
+.filter-btn.active::after{width:100%;}
+
+/* FEATURED */
+.featured{padding:3rem 2.5rem 0;}
+.featured-label{font-size:0.5rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,0.2);margin-bottom:1.5rem;}
+.featured-embed{position:relative;width:100%;padding-bottom:56.25%;background:var(--gray-dark);overflow:hidden;}
+.featured-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:none;}
+.featured-meta{padding:1.5rem 0 3rem;border-bottom:1px solid rgba(255,255,255,0.05);}
+.featured-title{font-family:var(--display);font-size:2.5rem;color:var(--white);letter-spacing:0.05em;margin-bottom:0.5rem;}
+.featured-desc{font-size:0.62rem;line-height:1.9;color:rgba(255,255,255,0.45);max-width:600px;}
+.featured-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:0.85rem;}
+.ftag{font-size:0.47rem;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid rgba(255,26,26,0.25);color:rgba(255,26,26,0.6);}
+
+/* VIDEO GRID */
+.grid-section{padding:3rem 2.5rem;}
+.grid-label{font-size:0.5rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,0.2);margin-bottom:2rem;}
+.video-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.video-card{background:var(--gray-dark);position:relative;cursor:crosshair;overflow:hidden;}
+.video-card:hover .video-thumb-overlay{opacity:1;}
+.video-thumb{position:relative;width:100%;padding-bottom:56.25%;background:var(--gray-mid);}
+.video-thumb iframe{position:absolute;inset:0;width:100%;height:100%;border:none;pointer-events:none;}
+.video-thumb-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.25s;z-index:2;}
+.play-btn{width:48px;height:48px;border-radius:50%;border:2px solid var(--red);display:flex;align-items:center;justify-content:center;}
+.play-btn svg{fill:var(--red);margin-left:3px;}
+.video-info{padding:1rem 1.25rem 1.25rem;}
+.video-cat{font-size:0.45rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--red);margin-bottom:0.3rem;}
+.video-title{font-family:var(--display);font-size:1.1rem;color:var(--white);letter-spacing:0.05em;line-height:1.1;}
+.video-note{font-size:0.52rem;line-height:1.7;color:rgba(255,255,255,0.35);margin-top:0.4rem;}
+
+/* LIGHTBOX */
+.lightbox{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;padding:2rem;}
+.lightbox.open{display:flex;}
+.lightbox-inner{width:100%;max-width:1000px;position:relative;}
+.lightbox-embed{position:relative;width:100%;padding-bottom:56.25%;}
+.lightbox-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:none;}
+.lightbox-close{position:absolute;top:-2.5rem;right:0;font-family:var(--mono);font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);cursor:crosshair;border:none;background:none;transition:color 0.2s;}
+.lightbox-close:hover{color:var(--red);}
+
+/* CTA */
+.page-cta{padding:4rem 2.5rem;text-align:center;border-top:1px solid rgba(255,26,26,0.1);}
+.page-cta p{font-size:0.65rem;color:rgba(255,255,255,0.4);margin-bottom:1.5rem;letter-spacing:0.03em;line-height:2;}
+.btn-red{background:var(--red);color:var(--black);border:none;padding:0.9rem 2rem;font-family:var(--mono);font-size:0.62rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;cursor:crosshair;text-decoration:none;transition:background 0.2s;display:inline-block;}
+.btn-red:hover{background:#ff3333;}
+
+.reveal{opacity:0;transform:translateY(20px);transition:opacity 0.65s ease,transform 0.65s ease;}
+.reveal.visible{opacity:1;transform:none;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:var(--black);}
+::-webkit-scrollbar-thumb{background:rgba(255,26,26,0.3);}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-logo" href="egotv.html">EGO <span>TV</span></a>
+  <a href="egotv.html" class="nav-back">← Agency</a>
+</nav>
+
+<!-- HEADER -->
+<header class="page-header reveal">
+  <div class="eyebrow">Video Work</div>
+  <h1 class="page-title">THE<br><span>REEL.</span></h1>
+  <p class="page-sub">Music videos, spec ads, documentary, and event coverage. Shot with a VHS soul and a modern eye — grain, warmth, and intention in every frame.</p>
+</header>
+
+<!-- FILTERS -->
+<div class="filters">
+  <span class="filters-label">Filter by →</span>
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn" data-filter="music-video">Music Video</button>
+  <button class="filter-btn" data-filter="spec-ad">Spec Ad</button>
+  <button class="filter-btn" data-filter="documentary">Documentary</button>
+  <button class="filter-btn" data-filter="cinematic">Cinematic</button>
+  <button class="filter-btn" data-filter="event">Event / BTS</button>
+</div>
+
+<!-- FEATURED -->
+<div class="featured reveal">
+  <div class="featured-label">Featured Work</div>
+  <div class="featured-embed">
+    <iframe src="https://www.youtube.com/embed/MTbd80RQ1I4" title="TYLA - TRP Don GY" allowfullscreen loading="lazy"></iframe>
+  </div>
+  <div class="featured-meta">
+    <div class="featured-title">TYLA — TRP Don GY (Official Music Video)</div>
+    <p class="featured-desc">Contributed VHS cinematography and still photography to TRP Don GY's official music video for TYLA. The VHS aesthetic was central to the visual identity of the project.</p>
+    <div class="featured-tags">
+      <span class="ftag">Music Video</span>
+      <span class="ftag">VHS Cinematography</span>
+      <span class="ftag">Still Photography</span>
+      <span class="ftag">YouTube</span>
+    </div>
+  </div>
+</div>
+
+<!-- ALL VIDEOS GRID -->
+<div class="grid-section reveal">
+  <div class="grid-label">All Work</div>
+  <div class="video-grid" id="videoGrid">
+
+    <div class="video-card" data-cat="documentary" data-embed="https://player.vimeo.com/video/1198186202">
+      <div class="video-thumb">
+        <iframe src="https://player.vimeo.com/video/1198186202?background=1&autoplay=0&muted=1" allowfullscreen loading="lazy"></iframe>
+        <div class="video-thumb-overlay"><div class="play-btn"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></div></div>
+      </div>
+      <div class="video-info">
+        <div class="video-cat">Documentary</div>
+        <div class="video-title">Created to Create EP 2 — Kujenga (Trailer)</div>
+      </div>
+    </div>
+
+    <div class="video-card" data-cat="event" data-embed="https://player.vimeo.com/video/1198186002">
+      <div class="video-thumb">
+        <iframe src="https://player.vimeo.com/video/1198186002?background=1&autoplay=0&muted=1" allowfullscreen loading="lazy"></iframe>
+        <div class="video-thumb-overlay"><div class="play-btn"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></div></div>
+      </div>
+      <div class="video-info">
+        <div class="video-cat">Event</div>
+        <div class="video-title">AttitudeCPT After Movie</div>
+      </div>
+    </div>
+
+        <div class="video-card" data-cat="event" data-embed="https://player.vimeo.com/video/1198184300">
+      <div class="video-thumb">
+        <iframe src="https://player.vimeo.com/video/1198184300?background=1&autoplay=0&muted=1" allowfullscreen loading="lazy"></iframe>
+        <div class="video-thumb-overlay"><div class="play-btn"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></div></div>
+      </div>
+      <div class="video-info">
+        <div class="video-cat">Performance Trailer</div>
+        <div class="video-title">Burningforestboy x Lagos Street Performance</div>
+      </div>
+    </div>
+
+    <div class="video-card" data-cat="event" data-embed="https://player.vimeo.com/video/1198183517">
+      <div class="video-thumb">
+        <iframe src="https://player.vimeo.com/video/1198183517?background=1&autoplay=0&muted=1" allowfullscreen loading="lazy"></iframe>
+        <div class="video-thumb-overlay"><div class="play-btn"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></div></div>
+      </div>
+      <div class="video-info">
+        <div class="video-cat">Tour Clip</div>
+        <div class="video-title">Verve Magazine x STAYHOMME Tour Clip</div>
+      </div>
+    </div>
+
+    <div class="video-card" data-cat="event" data-embed="https://player.vimeo.com/video/1198177895">
+      <div class="video-thumb">
+        <iframe src="https://player.vimeo.com/video/1198177895?background=1&autoplay=0&muted=1" allowfullscreen loading="lazy"></iframe>
+        <div class="video-thumb-overlay"><div class="play-btn"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></div></div>
+      </div>
+      <div class="video-info">
+        <div class="video-cat">BTS</div>
+        <div class="video-title">Justin 929 x Ke Wave — Behind The Scenes</div>
+      </div>
+    </div>
+
+    <div class="video-card" data-cat="music-video" data-embed="https://player.vimeo.com/video/1198177547">
+      <div class="video-thumb">
+        <iframe src="https://player.vimeo.com/video/1198177547?background=1&autoplay=0&muted=1" allowfullscreen loading="lazy"></iframe>
+        <div class="video-thumb-overlay"><div class="play-btn"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></div></div>
+      </div>
+      <div class="video-info">
+        <div class="video-cat">Music Video</div>
+        <div class="video-title">Maglera x BrotherKupa — Puma &amp; PPC</div>
+      </div>
+    </div>
+
+    <div class="video-card" data-cat="cinematic" data-embed="https://player.vimeo.com/video/1198177322">
+      <div class="video-thumb">
+        <iframe src="https://player.vimeo.com/video/1198177322?background=1&autoplay=0&muted=1" allowfullscreen loading="lazy"></iframe>
+        <div class="video-thumb-overlay"><div class="play-btn"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></div></div>
+      </div>
+      <div class="video-info">
+        <div class="video-cat">Cinematic</div>
+        <div class="video-title">A Grandmother's Love</div>
+      </div>
+    </div>
+
+    <div class="video-card" data-cat="cinematic" data-embed="https://player.vimeo.com/video/1198176237">
+      <div class="video-thumb">
+        <iframe src="https://player.vimeo.com/video/1198176237?background=1&autoplay=0&muted=1" allowfullscreen loading="lazy"></iframe>
+        <div class="video-thumb-overlay"><div class="play-btn"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></div></div>
+      </div>
+      <div class="video-info">
+        <div class="video-cat">Cinematic</div>
+        <div class="video-title">iNtwentle</div>
+      </div>
+    </div>
+
+    <div class="video-card" data-cat="spec-ad" data-embed="https://player.vimeo.com/video/1198165917">
+      <div class="video-thumb">
+        <iframe src="https://player.vimeo.com/video/1198165917?background=1&autoplay=0&muted=1" allowfullscreen loading="lazy"></iframe>
+        <div class="video-thumb-overlay"><div class="play-btn"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></div></div>
+      </div>
+      <div class="video-info">
+        <div class="video-cat">Spec Ad</div>
+        <div class="video-title">On The Run — Converse Spec Ad 2</div>
+      </div>
+    </div>
+
+    <div class="video-card" data-cat="spec-ad" data-embed="https://player.vimeo.com/video/1198160211">
+      <div class="video-thumb">
+        <iframe src="https://player.vimeo.com/video/1198160211?background=1&autoplay=0&muted=1" allowfullscreen loading="lazy"></iframe>
+        <div class="video-thumb-overlay"><div class="play-btn"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></div></div>
+      </div>
+      <div class="video-info">
+        <div class="video-cat">Spec Ad</div>
+        <div class="video-title">Converse Spec Ad 1</div>
+      </div>
+    </div>
+
+    <div class="video-card" data-cat="documentary" data-embed="https://www.youtube.com/embed/whHXQRIg1ZQ">
+      <div class="video-thumb">
+        <iframe src="https://www.youtube.com/embed/whHXQRIg1ZQ" allowfullscreen loading="lazy"></iframe>
+        <div class="video-thumb-overlay"><div class="play-btn"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></div></div>
+      </div>
+      <div class="video-info">
+        <div class="video-cat">Documentary · Trailer</div>
+        <div class="video-title">Look Ma, No Hands (Trailer)</div>
+      </div>
+    </div>
+
+    <div class="video-card" data-cat="documentary" data-embed="https://www.youtube.com/embed/TxmmTBZ1S7E">
+      <div class="video-thumb">
+        <iframe src="https://www.youtube.com/embed/TxmmTBZ1S7E" allowfullscreen loading="lazy"></iframe>
+        <div class="video-thumb-overlay"><div class="play-btn"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></div></div>
+      </div>
+      <div class="video-info">
+        <div class="video-cat">Documentary · EP 1</div>
+        <div class="video-title">Created to Create EP 1 w/ Siinaye</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-inner">
+    <button class="lightbox-close" id="lightboxClose">✕ Close</button>
+    <div class="lightbox-embed">
+      <iframe id="lightboxFrame" src="" allowfullscreen></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="page-cta reveal">
+  <p>Like what you see? Let's work together.</p>
+  <a href="egotv.html#contact" class="btn-red">Start a Project →</a>
+</div>
+
+<script>
+// Filter
+const filterBtns = document.querySelectorAll('.filter-btn');
+const videoCards = document.querySelectorAll('.video-card');
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter;
+    videoCards.forEach(card => {
+      card.style.display = (filter === 'all' || card.dataset.cat === filter) ? 'block' : 'none';
+    });
+  });
+});
+
+// Lightbox
+const lightbox = document.getElementById('lightbox');
+const lightboxFrame = document.getElementById('lightboxFrame');
+const lightboxClose = document.getElementById('lightboxClose');
+
+videoCards.forEach(card => {
+  card.addEventListener('click', () => {
+    const embed = card.dataset.embed;
+    const src = embed.includes('vimeo') ? embed + '?autoplay=1' : embed + '?autoplay=1';
+    lightboxFrame.src = src;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+});
+
+function closeLightbox() {
+  lightbox.classList.remove('open');
+  lightboxFrame.src = '';
+  document.body.style.overflow = '';
+}
+lightboxClose.addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', e => { if(e.target === lightbox) closeLightbox(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLightbox(); });
+
+// Reveal
+const reveals = document.querySelectorAll('.reveal');
+const ro = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if(e.isIntersecting){ setTimeout(() => e.target.classList.add('visible'), i * 60); ro.unobserve(e.target); }
+  });
+}, {threshold: 0.08});
+reveals.forEach(el => ro.observe(el));
+</script>
+</body>
+</html>
