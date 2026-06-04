@@ -96,6 +96,65 @@ canvas.ego-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-event
 .eyebrow-taken{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.35em;text-transform:uppercase;}
 .oge-screen .eyebrow-taken{color:rgba(255,255,255,0.4);}
 .ego-screen .eyebrow-taken{color:rgba(255,26,26,0.6);}
+
+/* ── MOBILE RESPONSIVE ── */
+@media(max-width:768px){
+  html,body{overflow:hidden;}
+
+  /* Stack top/bottom instead of left/right */
+  .split{flex-direction:column;}
+  .side{flex:1;width:100%;}
+
+  /* Teaser: top side expands, bottom shrinks */
+  .split.teaser-left .side-left{flex:1.35;}
+  .split.teaser-left .side-right{flex:0.65;}
+  .split.teaser-right .side-right{flex:1.35;}
+  .split.teaser-right .side-left{flex:0.65;}
+
+  /* Divider becomes horizontal */
+  .divider{
+    top:50%;left:0;right:0;bottom:auto;
+    width:100%;height:2px;
+    transform:translateY(-50%);
+  }
+
+  /* Content shifts on opposite teaser */
+  .split.teaser-right .side-left .content{transform:translateY(-8px);}
+  .split.teaser-left .side-right .content{transform:translateY(8px);}
+
+  /* Curtains become top/bottom */
+  .curtain-panel{left:0;right:0;width:100% !important;}
+  .curtain-left{top:0;bottom:auto;height:0;transition:height 0.65s cubic-bezier(0.77,0,0.18,1);}
+  .curtain-right{bottom:0;top:auto;height:0;transition:height 0.65s cubic-bezier(0.77,0,0.18,1);}
+  .root.taken-left .curtain-right{height:100%;}
+  .root.taken-right .curtain-left{height:100%;}
+
+  /* Smaller text */
+  .big-name{font-size:clamp(3rem,14vw,4.5rem);}
+  .taken-screen .big-name{font-size:clamp(3.5rem,16vw,5.5rem);}
+  .eyebrow{font-size:0.45rem;}
+  .tag{font-size:0.4rem;padding:2px 6px;}
+  .cta-hint{font-size:0.48rem;}
+  .bottom-label{font-size:0.4rem;bottom:8px;}
+
+  /* Tap hint instead of click */
+  .cta-hint::before{content:'Tap to Enter';display:block;}
+  .cta-hint{font-size:0;}
+  .cta-hint::before{font-family:var(--mono);font-size:0.48rem;letter-spacing:0.2em;text-transform:uppercase;}
+
+  /* Logo smaller */
+  .ego-logo{width:55px;height:55px;}
+  .ego-logo-big{width:75px;height:75px;}
+
+  /* Taken screen buttons larger for touch */
+  .enter-btn,.back-btn{padding:14px 24px;font-size:0.6rem;}
+}
+
+@media(max-width:480px){
+  .big-name{font-size:clamp(2.5rem,13vw,3.5rem);}
+  .tags{gap:4px;}
+  .tag{font-size:0.38rem;}
+}
 </style>
 </head>
 <body>
@@ -312,6 +371,55 @@ function goBack(){
 }
 document.getElementById('backFromOge').addEventListener('click',goBack);
 document.getElementById('backFromEgo').addEventListener('click',goBack);
+
+// Mobile: swap hover for tap, fix divider axis
+const isMobile = () => window.innerWidth <= 768;
+
+function setDividerMobile(pct){
+  if(isMobile()){
+    divider.style.left = '0';
+    divider.style.top = pct + '%';
+  } else {
+    divider.style.top = '0';
+    divider.style.left = pct + '%';
+  }
+}
+
+// On mobile use touch events instead of mouse
+sideL.addEventListener('touchstart', e => {
+  if(!isMobile() || locked) return;
+  e.preventDefault();
+  split.classList.add('teaser-left'); split.classList.remove('teaser-right');
+  startJava(); stopEgo();
+  scrambleTo(rightName,'OGE','#FF1A1A',550);
+}, {passive:false});
+
+sideR.addEventListener('touchstart', e => {
+  if(!isMobile() || locked) return;
+  e.preventDefault();
+  split.classList.add('teaser-right'); split.classList.remove('teaser-left');
+  startEgo(); stopJava();
+  scrambleTo(leftName,'EGO','#FF1A1A',550);
+}, {passive:false});
+
+sideL.addEventListener('touchend', e => {
+  if(!isMobile() || locked) return;
+  locked=true; stopJava(); stopEgo();
+  root.classList.add('taken-left');
+}, {passive:false});
+
+sideR.addEventListener('touchend', e => {
+  if(!isMobile() || locked) return;
+  locked=true; stopJava(); stopEgo();
+  root.classList.add('taken-right');
+}, {passive:false});
+
+// Resize handler — reset divider axis
+window.addEventListener('resize', () => {
+  setDividerMobile(50);
+  currentPct = 50;
+});
+
 </script>
 </body>
 </html>
