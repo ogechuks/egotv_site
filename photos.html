@@ -38,7 +38,7 @@ body{background:#000;overflow:hidden;font-family:'Space Mono',monospace;cursor:c
 .loader-logo span{color:#FF1A1A;}
 .loader-text{font-size:0.48rem;letter-spacing:0.35em;text-transform:uppercase;color:rgba(255,255,255,0.25);}
 .loader-bar{width:140px;height:1px;background:rgba(255,255,255,0.08);}
-.loader-fill{height:100%;background:#FF1A1A;width:0%;transition:width 0.4s;}
+.loader-fill{height:100%;background:#FF1A1A;width:0%;transition:width 0.3s;}
 .enter-screen{position:fixed;inset:0;z-index:210;background:rgba(0,0,0,0.92);display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;cursor:pointer;}
 .enter-screen.show{display:flex;}
 .enter-logo{font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:0.12em;color:#fff;}
@@ -84,7 +84,7 @@ body{background:#000;overflow:hidden;font-family:'Space Mono',monospace;cursor:c
   <div class="enter-btn-inner">Tap to Enter</div>
 </div>
 <audio id="bgAudio" loop preload="auto">
-  <source src="assets/ego-tv-audio.m4a" type="audio/mpeg">
+  <source src="assets/ego-tv-audio.mp3" type="audio/mpeg">
 </audio>
 
 <script type="importmap">
@@ -95,7 +95,7 @@ body{background:#000;overflow:hidden;font-family:'Space Mono',monospace;cursor:c
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-/* ── IMAGES ── */
+/* ── IMAGES — rename photos 1.jpg to 20.jpg in assets/ ── */
 const IMAGES = [
   'assets/1.jpg','assets/2.jpg','assets/3.jpg','assets/4.jpg',
   'assets/5.jpg','assets/6.jpg','assets/7.jpg','assets/8.jpg',
@@ -106,142 +106,150 @@ const IMAGES = [
 const COUNT    = 20;
 const SPHERE_R = 5.5;
 const PW = 1.08, PH = 1.35;
-const isMobile = () => window.innerWidth <= 768 || ('ontouchstart' in window);
+
+/* ── DEVICE TIER — reduce load on low-end phones ── */
+const isMobile   = () => window.innerWidth <= 768 || ('ontouchstart' in window);
+const isLowEnd   = () => {
+  const mem = navigator.deviceMemory; // GB, Chrome only
+  if(mem && mem <= 2) return true;
+  const cores = navigator.hardwareConcurrency;
+  if(cores && cores <= 4) return true;
+  return false;
+};
+const LOW = isLowEnd();
+const PIXEL_RATIO   = LOW ? 1 : Math.min(devicePixelRatio, 2);
+const SPOKE_COUNT   = LOW ? 16 : 32;
+const GRAIN_RATE    = LOW ? 180 : 90;
+const FLOAT_ENABLED = !LOW;
 
 /* ── SCENE ── */
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
 const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
 camera.position.set(0, 0, 0.01);
-const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('canvas'),antialias:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+const renderer = new THREE.WebGLRenderer({
+  canvas: document.getElementById('canvas'),
+  antialias: !LOW,
+  powerPreference: 'high-performance'
+});
+renderer.setPixelRatio(PIXEL_RATIO);
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 /* ── CONTROLS ── */
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; controls.dampingFactor = 0.06;
-controls.minDistance = 0.3; controls.maxDistance = 14;
-controls.autoRotate = true; controls.autoRotateSpeed = 0.4;
-controls.enablePan = false;
+controls.enableDamping   = true;
+controls.dampingFactor   = 0.06;
+controls.minDistance     = 0.3;
+controls.maxDistance     = LOW ? 10 : 14;
+controls.autoRotate      = true;
+controls.autoRotateSpeed = 0.4;
+controls.enablePan       = false;
 
 /* ── LIGHTS ── */
 scene.add(new THREE.AmbientLight(0xffffff, 1.2));
 const redLight = new THREE.PointLight(0xFF1A1A, 2.0, 25);
 scene.add(redLight);
 
-/* ── CONSTRUCT ── */
+/* ── CONSTRUCT — fewer spokes on low-end ── */
 const construct = new THREE.Group();
 scene.add(construct);
 const mA=new THREE.LineBasicMaterial({color:0xFF1A1A,transparent:true,opacity:0.6});
 const mB=new THREE.LineBasicMaterial({color:0xFF1A1A,transparent:true,opacity:0.3});
 const mC=new THREE.LineBasicMaterial({color:0xFF1A1A,transparent:true,opacity:0.12});
-for(let i=0;i<32;i++){
-  const phi=Math.acos(1-2*(i+0.5)/32),theta=Math.PI*(1+Math.sqrt(5))*i,R=24;
+for(let i=0;i<SPOKE_COUNT;i++){
+  const phi=Math.acos(1-2*(i+0.5)/SPOKE_COUNT),theta=Math.PI*(1+Math.sqrt(5))*i,R=24;
   const end=new THREE.Vector3(R*Math.sin(phi)*Math.cos(theta),R*Math.cos(phi),R*Math.sin(phi)*Math.sin(theta));
   construct.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),end]),i%5===0?mA:i%2===0?mB:mC));
 }
-[[1.8,0.65],[3.2,0.4],[5.5,0.28],[8.5,0.15],[13,0.07],[19,0.04]].forEach(([r,op])=>{
-  const pts=[];
-  for(let j=0;j<=96;j++){const a=(j/96)*Math.PI*2;pts.push(new THREE.Vector3(Math.cos(a)*r,Math.sin(a)*r*0.45,Math.sin(a)*r));}
+const rings = LOW
+  ? [[1.8,0.65],[5.5,0.28],[13,0.07]]
+  : [[1.8,0.65],[3.2,0.4],[5.5,0.28],[8.5,0.15],[13,0.07],[19,0.04]];
+rings.forEach(([r,op])=>{
+  const pts=[];const segs=LOW?48:96;
+  for(let j=0;j<=segs;j++){const a=(j/segs)*Math.PI*2;pts.push(new THREE.Vector3(Math.cos(a)*r,Math.sin(a)*r*0.45,Math.sin(a)*r));}
   construct.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0xFF1A1A,transparent:true,opacity:op})));
 });
 
-/* ── IMAGES ── */
-const imageGroup = new THREE.Group();
+/* ── TAP SPRITE ── */
+function makeTapSprite(){
+  const cv=document.createElement('canvas');
+  cv.width=200;cv.height=60;
+  const cx=cv.getContext('2d');
+  cx.font='500 22px Space Mono,monospace';
+  cx.fillStyle='rgba(255,26,26,0.9)';
+  cx.textAlign='center';
+  cx.fillText('TAP',100,38);
+  const mat=new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,opacity:0.9,depthTest:false});
+  const s=new THREE.Sprite(mat);
+  s.scale.set(0.55,0.18,1);
+  s.position.set(0,PH/2+0.18,0);
+  return s;
+}
+
+/* ── IMAGES — load all in parallel ── */
+const imageGroup=new THREE.Group();
 scene.add(imageGroup);
-const meshes = [];
+const meshes=[];
 
 function goldenPt(i,n,r){
-  const phi=Math.acos(1-2*(i+0.5)/n), theta=Math.PI*(1+Math.sqrt(5))*i;
-  return new THREE.Vector3(r*Math.sin(phi)*Math.cos(theta), r*Math.cos(phi), r*Math.sin(phi)*Math.sin(theta));
+  const phi=Math.acos(1-2*(i+0.5)/n),theta=Math.PI*(1+Math.sqrt(5))*i;
+  return new THREE.Vector3(r*Math.sin(phi)*Math.cos(theta),r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta));
 }
 
-/* TAP label — rendered as a sprite above each image */
-function makeTapSprite(){
-  const canvas = document.createElement('canvas');
-  canvas.width = 200; canvas.height = 60;
-  const ctx = canvas.getContext('2d');
-  ctx.font = '500 22px Space Mono, monospace';
-  ctx.letterSpacing = '6px';
-  ctx.fillStyle = 'rgba(255,26,26,0.85)';
-  ctx.textAlign = 'center';
-  ctx.fillText('TAP', 100, 38);
-  const tex = new THREE.CanvasTexture(canvas);
-  const mat = new THREE.SpriteMaterial({map:tex, transparent:true, opacity:0.9, depthTest:false});
-  const sprite = new THREE.Sprite(mat);
-  sprite.scale.set(0.55, 0.18, 1);
-  sprite.position.set(0, PH/2 + 0.18, 0);
-  return sprite;
-}
-
-const loaderFill = document.getElementById('loaderFill');
-loaderFill.style.width = '10%';
-
-/* load all textures in parallel */
-let loaded = 0;
-const textures = new Array(COUNT);
+const loaderFill=document.getElementById('loaderFill');
+loaderFill.style.width='10%';
+let loaded=0;
+const textures=new Array(COUNT);
 
 function onAllLoaded(){
-  const geo = new THREE.PlaneGeometry(PW, PH);
+  const geo=new THREE.PlaneGeometry(PW,PH);
   for(let i=0;i<COUNT;i++){
-    const mat  = new THREE.MeshBasicMaterial({map:textures[i], side:THREE.DoubleSide});
-    const mesh = new THREE.Mesh(geo, mat);
-    const pos  = goldenPt(i, COUNT, SPHERE_R);
-    mesh.position.copy(pos);
-    mesh.lookAt(0, 0, 0);
-
-    /* red border */
-    const edges = new THREE.LineSegments(
-      new THREE.EdgesGeometry(geo),
-      new THREE.LineBasicMaterial({color:0xFF1A1A, transparent:true, opacity:0.25})
-    );
+    const mat=new THREE.MeshBasicMaterial({map:textures[i],side:THREE.DoubleSide});
+    const mesh=new THREE.Mesh(geo,mat);
+    const pos=goldenPt(i,COUNT,SPHERE_R);
+    mesh.position.copy(pos);mesh.lookAt(0,0,0);
+    const edges=new THREE.LineSegments(new THREE.EdgesGeometry(geo),new THREE.LineBasicMaterial({color:0xFF1A1A,transparent:true,opacity:0.25}));
     mesh.add(edges);
-
-    /* tap sprite */
-    const tap = makeTapSprite();
+    const tap=makeTapSprite();
     mesh.add(tap);
-    tap.visible = true;
-
-    mesh.userData = {edges, tap, highlighted:false};
-    imageGroup.add(mesh);
-    meshes.push(mesh);
+    tap.visible=true;
+    mesh.userData={edges,tap};
+    imageGroup.add(mesh);meshes.push(mesh);
   }
-
-  loaderFill.style.width = '100%';
+  loaderFill.style.width='100%';
   setTimeout(()=>{
     document.getElementById('loader').classList.add('done');
-    if(isMobile()){
-      document.getElementById('enterScreen').classList.add('show');
-    } else {
-      tryPlayAudio();
-    }
-  }, 700);
+    if(isMobile()) document.getElementById('enterScreen').classList.add('show');
+    else tryPlayAudio();
+  },700);
 }
 
-const txLoader = new THREE.TextureLoader();
-IMAGES.forEach((src, i) => {
-  txLoader.load(src, tex => {
-    tex.colorSpace = THREE.SRGBColorSpace;
-    textures[i] = tex;
+const txLoader=new THREE.TextureLoader();
+IMAGES.forEach((src,i)=>{
+  txLoader.load(src,tex=>{
+    tex.colorSpace=THREE.SRGBColorSpace;
+    textures[i]=tex;
     loaded++;
-    loaderFill.style.width = (10 + (loaded/COUNT)*85) + '%';
-    if(loaded === COUNT) onAllLoaded();
-  }, undefined, () => {
-    /* if an image fails, use a fallback dark texture */
-    const fb = new THREE.DataTexture(new Uint8Array([20,20,20,255]),1,1);
-    fb.colorSpace = THREE.SRGBColorSpace;
-    textures[i] = fb;
+    loaderFill.style.width=(10+(loaded/COUNT)*85)+'%';
+    if(loaded===COUNT) onAllLoaded();
+  },undefined,()=>{
+    const fb=new THREE.DataTexture(new Uint8Array([20,20,20,255]),1,1);
+    textures[i]=fb;
     loaded++;
-    loaderFill.style.width = (10 + (loaded/COUNT)*85) + '%';
-    if(loaded === COUNT) onAllLoaded();
+    loaderFill.style.width=(10+(loaded/COUNT)*85)+'%';
+    if(loaded===COUNT) onAllLoaded();
   });
 });
 
-/* ── AUDIO ── */
-const audio = document.getElementById('bgAudio');
-const aBtn  = document.getElementById('audioBtn');
-audio.volume = 0;
+/* ── AUDIO — stop on page exit ── */
+const audio=document.getElementById('bgAudio');
+const aBtn =document.getElementById('audioBtn');
+audio.volume=0;
+
+window.addEventListener('pagehide',()=>{ audio.pause(); audio.currentTime=0; });
+window.addEventListener('beforeunload',()=>{ audio.pause(); });
 
 function fadeIn(tgt,ms){
   const s=80,iv=ms/s,step=tgt/s;let n=0;
@@ -256,95 +264,73 @@ aBtn.addEventListener('click',()=>{
 });
 
 /* ── ENTER SCREEN ── */
-const enterScreen = document.getElementById('enterScreen');
-enterScreen.addEventListener('click',()=>{
-  enterScreen.classList.remove('show');
+document.getElementById('enterScreen').addEventListener('click',()=>{
+  document.getElementById('enterScreen').classList.remove('show');
   tryPlayAudio();
-  if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){
-    DeviceOrientationEvent.requestPermission()
-      .then(r=>{ if(r==='granted') startGyro(); else startOrbit(); })
-      .catch(()=>startOrbit());
-  } else {
-    startGyro();
-  }
+  if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
+    DeviceOrientationEvent.requestPermission().then(r=>{if(r==='granted')startGyro();else startOrbit();}).catch(()=>startOrbit());
+  } else { startGyro(); }
 },{once:true});
 
 /* ── GYRO ── */
-let gyroMode = false;
-const gyroBtn  = document.getElementById('gyroBtn');
-const gyroHint = document.getElementById('gyroHint');
-const hudHint  = document.getElementById('hudHint');
-const q0 = new THREE.Quaternion();
-const q1 = new THREE.Quaternion(-Math.sqrt(0.5),0,0,Math.sqrt(0.5));
-const euler = new THREE.Euler();
+let gyroMode=false;
+const gyroBtn =document.getElementById('gyroBtn');
+const gyroHint=document.getElementById('gyroHint');
+const hudHint =document.getElementById('hudHint');
+const q0=new THREE.Quaternion();
+const q1=new THREE.Quaternion(-Math.sqrt(0.5),0,0,Math.sqrt(0.5));
+const euler=new THREE.Euler();
 
 function onOrientation(e){
-  if(!gyroMode) return;
-  euler.set(
-    THREE.MathUtils.degToRad(e.beta  || 0),
-    THREE.MathUtils.degToRad(e.alpha || 0),
-   -THREE.MathUtils.degToRad(e.gamma || 0),
-    'YXZ'
-  );
-  q0.setFromEuler(euler);
-  q0.multiply(q1);
-  camera.quaternion.copy(q0);
+  if(!gyroMode)return;
+  euler.set(THREE.MathUtils.degToRad(e.beta||0),THREE.MathUtils.degToRad(e.alpha||0),-THREE.MathUtils.degToRad(e.gamma||0),'YXZ');
+  q0.setFromEuler(euler);q0.multiply(q1);camera.quaternion.copy(q0);
 }
-window.addEventListener('deviceorientation', onOrientation, true);
+window.addEventListener('deviceorientation',onOrientation,true);
 
-function showGyroHint(){
-  gyroHint.classList.add('show');
-  setTimeout(()=>gyroHint.classList.remove('show'), 3500);
-}
+function showGyroHint(){gyroHint.classList.add('show');setTimeout(()=>gyroHint.classList.remove('show'),3500);}
 
 function startGyro(){
-  gyroMode = true;
-  controls.enabled = false;
-  controls.autoRotate = false;
+  gyroMode=true;controls.enabled=false;controls.autoRotate=false;
   camera.position.set(0,0,0);
-  gyroBtn.textContent = '↻ Orbit mode';
-  gyroBtn.classList.add('active');
-  hudHint.textContent = 'Move your phone · Tap to highlight';
+  gyroBtn.textContent='↻ Orbit mode';gyroBtn.classList.add('active');
+  hudHint.textContent='Move your phone to explore';
   showGyroHint();
-  /* show tap sprites in gyro mode */
-  meshes.forEach(m=>m.userData.tap.visible=true);
+  /* hide TAP sprites in gyro — no tap interaction */
+  meshes.forEach(m=>m.userData.tap.visible=false);
 }
 
 function startOrbit(){
-  gyroMode = false;
-  controls.enabled = true;
-  controls.autoRotate = true;
-  camera.position.set(0,0,0.01);
-  camera.quaternion.set(0,0,0,1);
-  controls.target.set(0,0,0);
-  controls.update();
-  gyroBtn.textContent = '⊙ Gyro mode';
-  gyroBtn.classList.remove('active');
-  hudHint.textContent = 'Drag to orbit · Scroll to zoom · Click to focus';
-  /* show tap sprites in orbit mode too */
-  meshes.forEach(m=>m.userData.tap.visible=true);
+  gyroMode=false;controls.enabled=true;controls.autoRotate=true;
+  camera.position.set(0,0,0.01);camera.quaternion.set(0,0,0,1);
+  controls.target.set(0,0,0);controls.update();
+  gyroBtn.textContent='⊙ Gyro mode';gyroBtn.classList.remove('active');
+  hudHint.textContent='Drag to orbit · Scroll to zoom · Click to focus';
+  /* show TAP sprites in orbit mode */
+  if(!isFocused) meshes.forEach(m=>m.userData.tap.visible=true);
 }
 
 gyroBtn.addEventListener('click',()=>{
   if(gyroMode){startOrbit();}
   else{
-    if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){
+    if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
       DeviceOrientationEvent.requestPermission().then(r=>{if(r==='granted')startGyro();}).catch(()=>{});
     } else {startGyro();}
   }
 });
 
-/* ── FOCUS / HIGHLIGHT ── */
-const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
-let hovered=null, focused=null, isFocused=false;
-let gyroHighlighted = null; /* highlighted mesh in gyro mode */
-
-const hudTitle = document.getElementById('hudTitle');
-const fbBtn    = document.getElementById('focusBack');
+/* ── FOCUS ── */
+const ray=new THREE.Raycaster();
+const ptr=new THREE.Vector2();
+/* throttle raycasting — only cast every N frames to save CPU on low-end */
+const RAY_INTERVAL=LOW?3:1;
+let rayFrame=0;
+let hovered=null,focused=null,isFocused=false;
+const hudTitle=document.getElementById('hudTitle');
+const fbBtn   =document.getElementById('focusBack');
 
 function setPtr(cx,cy){ptr.x=(cx/innerWidth)*2-1;ptr.y=-(cy/innerHeight)*2+1;}
 
-/* tween */
 const cFrom=new THREE.Vector3(),cTo=new THREE.Vector3();
 const tFrom=new THREE.Vector3(),tTo=new THREE.Vector3();
 let tweenT=0,tweening=false,tweenFocus=false;
@@ -354,19 +340,15 @@ function ease(t){return t<0.5?2*t*t:-1+(4-2*t)*t;}
 function startTween(camTo,tgtTo,forFocus){
   cFrom.copy(camera.position);cTo.copy(camTo);
   tFrom.copy(controls.target);tTo.copy(tgtTo);
-  tweenT=0;tweening=true;tweenFocus=forFocus;
-  controls.enabled=false;
+  tweenT=0;tweening=true;tweenFocus=forFocus;controls.enabled=false;
 }
 
-/* orbit mode focus */
 function focusOn(mesh){
   if(isFocused&&focused===mesh)return;
   isFocused=true;focused=mesh;controls.autoRotate=false;
   const wp=new THREE.Vector3();mesh.getWorldPosition(wp);
   startTween(wp.clone().sub(wp.clone().normalize().multiplyScalar(1.6)),wp,true);
-  hudTitle.style.opacity='0';
-  hudHint.style.opacity='0';
-  fbBtn.classList.add('visible');
+  hudTitle.style.opacity='0';hudHint.style.opacity='0';fbBtn.classList.add('visible');
   meshes.forEach(m=>{
     m.material.opacity=m===mesh?1:0.07;
     m.userData.edges.material.opacity=m===mesh?1:0;
@@ -377,43 +359,22 @@ function focusOn(mesh){
 function unfocus(){
   isFocused=false;focused=null;controls.autoRotate=true;
   startTween(new THREE.Vector3(0,0,0.01),new THREE.Vector3(0,0,0),false);
-  hudTitle.style.opacity='0';hudHint.style.opacity='1';
-  fbBtn.classList.remove('visible');
+  hudTitle.style.opacity='0';hudHint.style.opacity='1';fbBtn.classList.remove('visible');
   meshes.forEach(m=>{
     m.material.opacity=1;
     m.userData.edges.material.opacity=0.25;
-    m.userData.tap.visible=true;
+    if(!gyroMode) m.userData.tap.visible=true;
   });
 }
 fbBtn.addEventListener('click',unfocus);
 
-/* gyro mode highlight — just glows the tapped image */
-function gyroHighlight(mesh){
-  if(gyroHighlighted===mesh)return;
-  /* reset previous */
-  if(gyroHighlighted){
-    gyroHighlighted.userData.edges.material.opacity=0.25;
-    gyroHighlighted.material.opacity=1;
-  }
-  gyroHighlighted=mesh;
-  mesh.userData.edges.material.opacity=1.0;
-  mesh.material.opacity=1;
-  /* dim others slightly */
-  meshes.forEach(m=>{if(m!==mesh) m.material.opacity=0.45;});
-}
+/* mouse hover — throttled */
+let lastMouseX=0,lastMouseY=0;
+window.addEventListener('mousemove',e=>{lastMouseX=e.clientX;lastMouseY=e.clientY;});
 
-function clearGyroHighlight(){
-  if(gyroHighlighted){
-    gyroHighlighted.userData.edges.material.opacity=0.25;
-    gyroHighlighted=null;
-  }
-  meshes.forEach(m=>m.material.opacity=1);
-}
-
-/* ── EVENTS ── */
-window.addEventListener('mousemove',e=>{
+function doHoverCheck(){
   if(isFocused||gyroMode)return;
-  setPtr(e.clientX,e.clientY);
+  setPtr(lastMouseX,lastMouseY);
   ray.setFromCamera(ptr,camera);
   const hits=ray.intersectObjects(meshes);
   if(hits.length>0){
@@ -424,55 +385,54 @@ window.addEventListener('mousemove',e=>{
     if(hovered){hovered.userData.edges.material.opacity=0.25;hovered=null;}
     document.body.style.cursor='crosshair';
   }
-});
+}
 
 window.addEventListener('click',e=>{
-  if(e.target===fbBtn||e.target===aBtn||e.target===gyroBtn)return;
+  if(e.target===fbBtn||e.target===aBtn||e.target===gyroBtn||gyroMode)return;
   setPtr(e.clientX,e.clientY);
   ray.setFromCamera(ptr,camera);
   const hits=ray.intersectObjects(meshes);
-  if(gyroMode){
-    /* gyro: tap just highlights */
-    if(hits.length>0) gyroHighlight(hits[0].object);
-    else clearGyroHighlight();
-  } else {
-    if(hits.length>0) focusOn(hits[0].object);
-    else if(isFocused) unfocus();
-  }
+  if(hits.length>0)focusOn(hits[0].object);
+  else if(isFocused)unfocus();
 });
 
 let tx=0,ty=0;
 window.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
 window.addEventListener('touchend',e=>{
-  const dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty;
+  if(gyroMode)return;
+  const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
   if(Math.abs(dx)>10||Math.abs(dy)>10)return;
-  const t=e.changedTouches[0];
-  setPtr(t.clientX,t.clientY);
+  const t=e.changedTouches[0];setPtr(t.clientX,t.clientY);
   ray.setFromCamera(ptr,camera);
   const hits=ray.intersectObjects(meshes);
-  if(gyroMode){
-    if(hits.length>0) gyroHighlight(hits[0].object);
-    else clearGyroHighlight();
-  } else {
-    if(isFocused){unfocus();return;}
-    if(hits.length>0) focusOn(hits[0].object);
-  }
+  if(isFocused){unfocus();return;}
+  if(hits.length>0)focusOn(hits[0].object);
 },{passive:true});
 
-/* ── GRAIN ── */
+/* ── GRAIN — slower on low-end ── */
 const gc=document.getElementById('grain'),gx=gc.getContext('2d');
-function grain(){gc.width=innerWidth;gc.height=innerHeight;const d=gx.createImageData(innerWidth,innerHeight);for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255|0;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=13;}gx.putImageData(d,0,0);}
-grain();setInterval(grain,90);
+function grain(){
+  gc.width=innerWidth;gc.height=innerHeight;
+  const d=gx.createImageData(innerWidth,innerHeight);
+  for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255|0;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=13;}
+  gx.putImageData(d,0,0);
+}
+grain();setInterval(grain,GRAIN_RATE);
 
 window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 
 /* ── RENDER LOOP ── */
 const clock=new THREE.Clock();
 const _wp=new THREE.Vector3();
+let tapPulseT=0;
 
 function animate(){
   requestAnimationFrame(animate);
-  const dt=clock.getDelta(), now=Date.now()*0.001;
+  const dt=clock.getDelta(),now=Date.now()*0.001;
+
+  /* throttled hover raycast */
+  rayFrame++;
+  if(rayFrame>=RAY_INTERVAL){rayFrame=0;doHoverCheck();}
 
   if(tweening){
     tweenT=Math.min(tweenT+dt/DUR,1);
@@ -483,7 +443,7 @@ function animate(){
   }
 
   if(gyroMode){
-    /* quaternion set by deviceorientation event */
+    /* quaternion driven by deviceorientation event */
   } else if(isFocused&&focused){
     focused.getWorldPosition(_wp);camera.lookAt(_wp);
   } else if(!tweening){
@@ -494,13 +454,16 @@ function animate(){
   construct.rotation.x=Math.sin(now*0.018)*0.07;
   redLight.intensity=1.8+Math.sin(now*1.9)*0.4;
 
-  if(!isFocused&&!gyroMode){
+  if(FLOAT_ENABLED&&!isFocused&&!gyroMode){
     meshes.forEach((m,i)=>{m.rotation.z=Math.sin(now*0.38+i*0.85)*0.025;});
   }
 
-  /* pulse tap sprite opacity */
-  const tapOpacity=0.5+Math.sin(now*2)*0.4;
-  meshes.forEach(m=>{if(m.userData.tap.visible) m.userData.tap.material.opacity=Math.max(0.1,tapOpacity);});
+  /* pulse TAP sprites — orbit mode only */
+  if(!gyroMode&&!isFocused){
+    tapPulseT+=dt;
+    const tapOp=0.5+Math.sin(tapPulseT*2)*0.4;
+    meshes.forEach(m=>{if(m.userData.tap.visible)m.userData.tap.material.opacity=Math.max(0.1,tapOp);});
+  }
 
   renderer.render(scene,camera);
 }
