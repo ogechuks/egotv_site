@@ -7,46 +7,67 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-:root{--red:#FF1A1A;--black:#000;--white:#f5f5f0;--gray:#888;--mono:'Space Mono',monospace;--display:'Bebas Neue',sans-serif;}
-html,body{height:100%;}
-body{background:var(--black);color:var(--white);font-family:var(--mono);cursor:crosshair;overflow:hidden;}
-::selection{background:var(--red);color:var(--black);}
-body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:99;opacity:0.3;mix-blend-mode:overlay;}
+body{background:#000;overflow:hidden;font-family:'Space Mono',monospace;cursor:crosshair;}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:1.25rem 2.5rem;background:rgba(0,0,0,0.55);backdrop-filter:blur(10px);}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:0.1em;color:#fff;text-decoration:none;}
+.nav-logo span{color:#FF1A1A;}
+.nav-back{font-size:0.52rem;letter-spacing:0.2em;text-transform:uppercase;color:#888;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:1px;transition:color 0.2s;}
+.nav-back:hover{color:#FF1A1A;}
+#canvas{position:fixed;inset:0;width:100%;height:100%;}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:50;opacity:0.14;mix-blend-mode:overlay;}
 
-.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:1.25rem 2.5rem;border-bottom:1px solid rgba(255,26,26,0.12);background:rgba(0,0,0,0.92);backdrop-filter:blur(10px);}
-.nav-logo{font-family:var(--display);font-size:1.6rem;letter-spacing:0.1em;color:var(--white);text-decoration:none;}
-.nav-logo span{color:var(--red);}
-.nav-back{font-size:0.52rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gray);text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:1px;transition:color 0.2s;}
-.nav-back:hover{color:var(--red);}
+/* HUD */
+.hud{position:fixed;bottom:2.5rem;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;align-items:center;gap:0.5rem;pointer-events:none;}
+.hud-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:0.12em;color:#fff;opacity:0;transition:opacity 0.4s;text-align:center;}
+.hud-hint{font-size:0.44rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,0.2);text-align:center;transition:opacity 0.4s;}
 
-.page{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;position:relative;}
+/* FOCUS BACK */
+.focus-back{position:fixed;bottom:2.5rem;right:2.5rem;z-index:100;font-size:0.5rem;letter-spacing:0.2em;text-transform:uppercase;color:#FF1A1A;border:1px solid rgba(255,26,26,0.3);padding:0.7rem 1.2rem;cursor:crosshair;opacity:0;pointer-events:none;transition:opacity 0.4s,background 0.2s;background:transparent;font-family:'Space Mono',monospace;}
+.focus-back:hover{background:rgba(255,26,26,0.08);}
+.focus-back.visible{opacity:1;pointer-events:all;}
 
-.bg-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--display);font-size:clamp(8rem,22vw,18rem);color:rgba(255,26,26,0.04);white-space:nowrap;pointer-events:none;line-height:1;user-select:none;letter-spacing:0.05em;}
+/* AUDIO */
+.audio-btn{position:fixed;bottom:2.5rem;left:2.5rem;z-index:100;font-size:0.5rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.3);border:1px solid rgba(255,255,255,0.08);padding:0.7rem 1.2rem;cursor:crosshair;transition:color 0.2s,border-color 0.2s;background:transparent;font-family:'Space Mono',monospace;}
+.audio-btn:hover{color:#FF1A1A;border-color:rgba(255,26,26,0.3);}
 
-.eyebrow{font-size:0.52rem;letter-spacing:0.35em;text-transform:uppercase;color:var(--red);margin-bottom:1.5rem;display:flex;align-items:center;justify-content:center;gap:0.65rem;position:relative;z-index:1;}
-.eyebrow::before{content:'';width:20px;height:1px;background:var(--red);}
-.eyebrow::after{content:'';width:20px;height:1px;background:var(--red);}
+/* GYRO TOGGLE — mobile only */
+.gyro-btn{position:fixed;top:5rem;right:1.25rem;z-index:100;font-size:0.48rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.35);border:1px solid rgba(255,255,255,0.1);padding:0.55rem 0.9rem;cursor:pointer;transition:color 0.2s,border-color 0.2s,background 0.2s;background:transparent;font-family:'Space Mono',monospace;display:none;}
+.gyro-btn.active{color:#FF1A1A;border-color:rgba(255,26,26,0.4);background:rgba(255,26,26,0.06);}
+@media(max-width:768px){.gyro-btn{display:block;}}
 
-.title{font-family:var(--display);font-size:clamp(4rem,10vw,8rem);line-height:0.9;letter-spacing:0.03em;color:var(--white);margin-bottom:2rem;position:relative;z-index:1;}
-.title span{color:var(--red);}
+/* GYRO HINT */
+.gyro-hint{position:fixed;bottom:6rem;left:50%;transform:translateX(-50%);z-index:150;display:flex;flex-direction:column;align-items:center;gap:0.75rem;opacity:0;pointer-events:none;transition:opacity 0.6s;}
+.gyro-hint.show{opacity:1;}
+.hint-phone{width:28px;height:44px;border:2px solid rgba(255,26,26,0.8);border-radius:5px;position:relative;animation:phonetilt 1.8s ease-in-out infinite;}
+.hint-phone::after{content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:rgba(255,26,26,0.7);}
+@keyframes phonetilt{0%{transform:rotate(-18deg);}50%{transform:rotate(18deg);}100%{transform:rotate(-18deg);}}
+.hint-text{font-size:0.44rem;letter-spacing:0.25em;text-transform:uppercase;color:rgba(255,255,255,0.45);text-align:center;line-height:1.9;white-space:nowrap;}
 
-.sub{font-size:0.65rem;line-height:2.1;color:rgba(255,255,255,0.4);max-width:400px;letter-spacing:0.04em;position:relative;z-index:1;margin-bottom:2.5rem;}
+/* LOADER */
+.loader{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;transition:opacity 0.8s;}
+.loader.done{opacity:0;pointer-events:none;}
+.loader-logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:0.15em;color:#fff;}
+.loader-logo span{color:#FF1A1A;}
+.loader-text{font-size:0.48rem;letter-spacing:0.35em;text-transform:uppercase;color:rgba(255,255,255,0.25);}
+.loader-bar{width:140px;height:1px;background:rgba(255,255,255,0.08);}
+.loader-fill{height:100%;background:#FF1A1A;width:0%;transition:width 0.4s;}
 
-.divider-line{width:40px;height:1px;background:rgba(255,26,26,0.3);margin:0 auto 2.5rem;position:relative;z-index:1;}
+/* ENTER SCREEN — mobile tap-to-enter (unlocks audio + gyro in one gesture) */
+.enter-screen{position:fixed;inset:0;z-index:210;background:rgba(0,0,0,0.92);display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;cursor:pointer;}
+.enter-screen.show{display:flex;}
+.enter-logo{font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:0.12em;color:#fff;}
+.enter-logo span{color:#FF1A1A;}
+.enter-sub{font-size:0.5rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,0.3);}
+.enter-btn-inner{font-size:0.55rem;letter-spacing:0.25em;text-transform:uppercase;color:#000;background:#FF1A1A;padding:1rem 2.2rem;font-family:'Space Mono',monospace;animation:pulse-btn 2s ease-in-out infinite;}
+@keyframes pulse-btn{0%,100%{box-shadow:0 0 0 0 rgba(255,26,26,0.4);}50%{box-shadow:0 0 0 10px rgba(255,26,26,0);}}
 
-.notify-text{font-size:0.52rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.25);position:relative;z-index:1;margin-bottom:1.25rem;}
-
-.contact-link{font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--red);text-decoration:none;border-bottom:1px solid rgba(255,26,26,0.3);padding-bottom:2px;transition:border-color 0.2s;position:relative;z-index:1;}
-.contact-link:hover{border-color:var(--red);}
-
-.btn-back{display:inline-block;margin-top:2.5rem;font-family:var(--mono);font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;padding:0.8rem 1.75rem;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.4);text-decoration:none;transition:border-color 0.2s,color 0.2s;position:relative;z-index:1;}
-.btn-back:hover{border-color:var(--red);color:var(--red);}
-
-/* Animated shutter */
-.shutter{position:relative;z-index:1;margin-bottom:2rem;}
-.shutter-icon{width:48px;height:48px;border-radius:50%;border:1.5px solid rgba(255,26,26,0.25);display:flex;align-items:center;justify-content:center;margin:0 auto;animation:shutter-pulse 3s ease-in-out infinite;}
-.shutter-inner{width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(255,26,26,0.4);}
-@keyframes shutter-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,26,26,0.15);}50%{box-shadow:0 0 0 10px rgba(255,26,26,0);}}
+@media(max-width:768px){
+  .nav{padding:0.85rem 1.25rem;}
+  .focus-back,.audio-btn{bottom:1.5rem;}
+  .focus-back{right:1.25rem;}
+  .audio-btn{left:1.25rem;}
+  .hud{bottom:5rem;}
+}
 </style>
 </head>
 <body>
@@ -56,38 +77,356 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
   <a href="egotv.html" class="nav-back">← Agency</a>
 </nav>
 
-<div class="page">
-  <div class="bg-text">PHOTO</div>
+<canvas id="canvas"></canvas>
+<canvas class="grain" id="grain"></canvas>
 
-  <div class="shutter">
-    <div class="shutter-icon">
-      <div class="shutter-inner"></div>
-    </div>
-  </div>
-
-  <div class="eyebrow">Photography Portfolio</div>
-
-  <h1 class="title">COMING<br><span>SOON.</span></h1>
-
-  <div class="divider-line"></div>
-
-  <p class="sub">The photography portfolio is being put together. Check back shortly — or get in touch if you need a photographer now.</p>
-
-  <div class="notify-text">In the meantime —</div>
-  <a href="mailto:info@egotv777.com" class="contact-link">info@egotv777.com</a>
-
-  <a href="egotv.html" class="btn-back">← Back to Agency</a>
+<div class="hud">
+  <div class="hud-title" id="hudTitle"></div>
+  <div class="hud-hint" id="hudHint">Drag to orbit &nbsp;·&nbsp; Scroll to zoom &nbsp;·&nbsp; Click to focus</div>
 </div>
 
+<button class="focus-back" id="focusBack">← Back to gallery</button>
+<button class="audio-btn"  id="audioBtn">♪ Mute</button>
+<button class="gyro-btn"   id="gyroBtn">↻ Orbit mode</button>
+
+<div class="gyro-hint" id="gyroHint">
+  <div class="hint-phone"></div>
+  <div class="hint-text">Move your phone to explore</div>
+</div>
+
+<div class="loader" id="loader">
+  <div class="loader-logo">EGO <span>TV</span></div>
+  <div class="loader-text">Entering the gallery</div>
+  <div class="loader-bar"><div class="loader-fill" id="loaderFill"></div></div>
+</div>
+
+<!-- Mobile enter screen — fires user gesture to unlock audio + gyro -->
+<div class="enter-screen" id="enterScreen">
+  <div class="enter-logo">EGO <span>TV</span></div>
+  <div class="enter-sub">Photography Gallery</div>
+  <div class="enter-btn-inner">Tap to Enter</div>
+</div>
+
+<audio id="bgAudio" loop preload="auto">
+  <source src="assets/ego-tv-audio.mp3" type="audio/mpeg">
+</audio>
+
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.158.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.158.0/examples/jsm/"}}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ── HELPERS ── */
+const isMobile = () => window.innerWidth <= 768 || ('ontouchstart' in window);
+
+/* ── SCENE ── */
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+
+const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
+camera.position.set(0, 0, 0.01);
+
+const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('canvas'),antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+/* ── CONTROLS ── */
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping   = true;
+controls.dampingFactor   = 0.06;
+controls.minDistance     = 0.3;
+controls.maxDistance     = 14;
+controls.autoRotate      = true;
+controls.autoRotateSpeed = 0.4;
+controls.enablePan       = false;
+
+/* ── LIGHTS ── */
+scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+const redLight = new THREE.PointLight(0xFF1A1A, 2.0, 25);
+scene.add(redLight);
+
+/* ── CONSTRUCT ── */
+const construct = new THREE.Group();
+scene.add(construct);
+const mA=new THREE.LineBasicMaterial({color:0xFF1A1A,transparent:true,opacity:0.6});
+const mB=new THREE.LineBasicMaterial({color:0xFF1A1A,transparent:true,opacity:0.3});
+const mC=new THREE.LineBasicMaterial({color:0xFF1A1A,transparent:true,opacity:0.12});
+for(let i=0;i<32;i++){
+  const phi=Math.acos(1-2*(i+0.5)/32),theta=Math.PI*(1+Math.sqrt(5))*i,R=24;
+  const end=new THREE.Vector3(R*Math.sin(phi)*Math.cos(theta),R*Math.cos(phi),R*Math.sin(phi)*Math.sin(theta));
+  construct.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),end]),i%5===0?mA:i%2===0?mB:mC));
+}
+[[1.8,0.65],[3.2,0.4],[5.5,0.28],[8.5,0.15],[13,0.07],[19,0.04]].forEach(([r,op])=>{
+  const pts=[];
+  for(let j=0;j<=96;j++){const a=(j/96)*Math.PI*2;pts.push(new THREE.Vector3(Math.cos(a)*r,Math.sin(a)*r*0.45,Math.sin(a)*r));}
+  construct.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0xFF1A1A,transparent:true,opacity:op})));
+});
+
+/* ── IMAGES ── */
+const imageGroup=new THREE.Group();
+scene.add(imageGroup);
+const meshes=[];
+function goldenPt(i,n,r){const phi=Math.acos(1-2*(i+0.5)/n),theta=Math.PI*(1+Math.sqrt(5))*i;return new THREE.Vector3(r*Math.sin(phi)*Math.cos(theta),r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta));}
+
+const PHOTO_TITLES=['Untitled I','Untitled II','Untitled III','Untitled IV','Untitled V','Untitled VI','Untitled VII','Untitled VIII','Untitled IX','Untitled X','Untitled XI','Untitled XII'];
+const COUNT=12,SPHERE_R=5.5,PW=1.08,PH=1.35;
+
+const loaderFill=document.getElementById('loaderFill');
+loaderFill.style.width='30%';
+
+let sceneReady=false;
+new THREE.TextureLoader().load('assets/egoTV_logo.png',tex=>{
+  tex.colorSpace=THREE.SRGBColorSpace;
+  loaderFill.style.width='80%';
+  const geo=new THREE.PlaneGeometry(PW,PH);
+  for(let i=0;i<COUNT;i++){
+    const mat=new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide});
+    const mesh=new THREE.Mesh(geo,mat);
+    const pos=goldenPt(i,COUNT,SPHERE_R);
+    mesh.position.copy(pos);mesh.lookAt(0,0,0);
+    const edges=new THREE.LineSegments(new THREE.EdgesGeometry(geo),new THREE.LineBasicMaterial({color:0xFF1A1A,transparent:true,opacity:0.25}));
+    mesh.add(edges);
+    mesh.userData={title:PHOTO_TITLES[i],edges};
+    imageGroup.add(mesh);meshes.push(mesh);
+  }
+  loaderFill.style.width='100%';
+  sceneReady=true;
+  setTimeout(()=>{
+    document.getElementById('loader').classList.add('done');
+    /* Show enter screen on mobile, auto-start on desktop */
+    if(isMobile()){
+      document.getElementById('enterScreen').classList.add('show');
+    } else {
+      tryPlayAudio();
+    }
+  },700);
+},undefined,()=>{
+  loaderFill.style.width='100%';
+  setTimeout(()=>document.getElementById('loader').classList.add('done'),400);
+});
+
+/* ── AUDIO ── */
+const audio=document.getElementById('bgAudio');
+const aBtn =document.getElementById('audioBtn');
+audio.volume=0;
+
+function fadeIn(tgt,ms){
+  const s=80,iv=ms/s,step=tgt/s;let n=0;
+  const t=setInterval(()=>{n++;audio.volume=Math.min(tgt,step*n);if(n>=s)clearInterval(t);},iv);
+}
+
+function tryPlayAudio(){
+  audio.play().then(()=>{fadeIn(0.12,5000);aBtn.textContent='♪ Mute';}).catch(()=>{aBtn.textContent='♪ Play';});
+}
+
+aBtn.addEventListener('click',()=>{
+  if(audio.paused){audio.play();fadeIn(0.12,2000);aBtn.textContent='♪ Mute';}
+  else{audio.pause();aBtn.textContent='♪ Play';}
+});
+
+/* ── ENTER SCREEN — one tap unlocks audio + gyro on mobile ── */
+const enterScreen=document.getElementById('enterScreen');
+enterScreen.addEventListener('click',()=>{
+  enterScreen.classList.remove('show');
+  tryPlayAudio();
+
+  /* request gyro permission here — inside user gesture, required by iOS */
+  if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){
+    DeviceOrientationEvent.requestPermission()
+      .then(r=>{ if(r==='granted') startGyro(); else startOrbit(); })
+      .catch(()=>startOrbit());
+  } else {
+    /* Android and non-iOS — permission not needed, start gyro directly */
+    startGyro();
+  }
+},{once:true});
+
+/* ── GYROSCOPE ── */
+let gyroMode=false;
+const gyroBtn =document.getElementById('gyroBtn');
+const gyroHint=document.getElementById('gyroHint');
+const hudHint =document.getElementById('hudHint');
+
+/* Rotation quaternions for converting device orientation to camera rotation */
+const q0 = new THREE.Quaternion();
+const q1 = new THREE.Quaternion(-Math.sqrt(0.5),0,0,Math.sqrt(0.5));
+const euler = new THREE.Euler();
+
+function onOrientation(e){
+  if(!gyroMode) return;
+  /* alpha=compass, beta=front-back tilt, gamma=left-right tilt */
+  euler.set(
+    THREE.MathUtils.degToRad(e.beta  || 0),
+    THREE.MathUtils.degToRad(e.alpha || 0),
+   -THREE.MathUtils.degToRad(e.gamma || 0),
+    'YXZ'
+  );
+  q0.setFromEuler(euler);
+  q0.multiply(q1);
+  camera.quaternion.copy(q0);
+}
+window.addEventListener('deviceorientation', onOrientation, true);
+
+function showHint(){
+  gyroHint.classList.add('show');
+  setTimeout(()=>gyroHint.classList.remove('show'),3500);
+}
+
+function startGyro(){
+  gyroMode=true;
+  controls.enabled=false;
+  controls.autoRotate=false;
+  camera.position.set(0,0,0);
+  gyroBtn.textContent='↻ Orbit mode';
+  gyroBtn.classList.add('active');
+  hudHint.textContent='Move your phone to explore';
+  showHint();
+}
+
+function startOrbit(){
+  gyroMode=false;
+  controls.enabled=true;
+  controls.autoRotate=true;
+  camera.position.set(0,0,0.01);
+  camera.quaternion.set(0,0,0,1);
+  controls.target.set(0,0,0);
+  controls.update();
+  gyroBtn.textContent='⊙ Gyro mode';
+  gyroBtn.classList.remove('active');
+  hudHint.textContent='Drag to orbit · Scroll to zoom · Click to focus';
+}
+
+gyroBtn.addEventListener('click',()=>{
+  if(gyroMode) startOrbit();
+  else {
+    /* toggling to gyro after initial load — may need permission again on iOS */
+    if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){
+      DeviceOrientationEvent.requestPermission().then(r=>{if(r==='granted')startGyro();}).catch(()=>{});
+    } else {
+      startGyro();
+    }
+  }
+});
+
+/* ── FOCUS ── */
+const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();
+let hovered=null,focused=null,isFocused=false;
+const hudTitle=document.getElementById('hudTitle');
+const fbBtn   =document.getElementById('focusBack');
+
+function setPtr(cx,cy){ptr.x=(cx/innerWidth)*2-1;ptr.y=-(cy/innerHeight)*2+1;}
+
+const cFrom=new THREE.Vector3(),cTo=new THREE.Vector3();
+const tFrom=new THREE.Vector3(),tTo=new THREE.Vector3();
+let tweenT=0,tweening=false,tweenFocus=false;
+const DUR=0.9;
+function ease(t){return t<0.5?2*t*t:-1+(4-2*t)*t;}
+
+function startTween(camTo,tgtTo,forFocus){
+  cFrom.copy(camera.position);cTo.copy(camTo);
+  tFrom.copy(controls.target);tTo.copy(tgtTo);
+  tweenT=0;tweening=true;tweenFocus=forFocus;
+  controls.enabled=false;
+}
+
+function focusOn(mesh){
+  if(gyroMode)return;
+  if(isFocused&&focused===mesh)return;
+  isFocused=true;focused=mesh;controls.autoRotate=false;
+  const wp=new THREE.Vector3();mesh.getWorldPosition(wp);
+  startTween(wp.clone().sub(wp.clone().normalize().multiplyScalar(1.6)),wp,true);
+  hudTitle.textContent=mesh.userData.title;hudTitle.style.opacity='1';
+  hudHint.style.opacity='0';fbBtn.classList.add('visible');
+  meshes.forEach(m=>{m.material.opacity=m===mesh?1:0.07;m.userData.edges.material.opacity=m===mesh?1:0;});
+}
+
+function unfocus(){
+  isFocused=false;focused=null;controls.autoRotate=true;
+  startTween(new THREE.Vector3(0,0,0.01),new THREE.Vector3(0,0,0),false);
+  hudTitle.style.opacity='0';hudHint.style.opacity='1';fbBtn.classList.remove('visible');
+  meshes.forEach(m=>{m.material.opacity=1;m.userData.edges.material.opacity=0.25;});
+}
+fbBtn.addEventListener('click',unfocus);
+
+window.addEventListener('mousemove',e=>{
+  if(isFocused||gyroMode)return;
+  setPtr(e.clientX,e.clientY);ray.setFromCamera(ptr,camera);
+  const hits=ray.intersectObjects(meshes);
+  if(hits.length>0){
+    const m=hits[0].object;
+    if(hovered!==m){if(hovered)hovered.userData.edges.material.opacity=0.25;hovered=m;m.userData.edges.material.opacity=0.8;}
+    hudTitle.textContent=m.userData.title;hudTitle.style.opacity='0.5';
+    document.body.style.cursor='pointer';
+  } else {
+    if(hovered){hovered.userData.edges.material.opacity=0.25;hovered=null;}
+    hudTitle.style.opacity='0';document.body.style.cursor='crosshair';
+  }
+});
+
+window.addEventListener('click',e=>{
+  if(e.target===fbBtn||e.target===aBtn||e.target===gyroBtn||gyroMode)return;
+  setPtr(e.clientX,e.clientY);ray.setFromCamera(ptr,camera);
+  const hits=ray.intersectObjects(meshes);
+  if(hits.length>0)focusOn(hits[0].object);
+  else if(isFocused)unfocus();
+});
+
+let tx=0,ty=0;
+window.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+window.addEventListener('touchend',e=>{
+  if(gyroMode)return;
+  const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+  if(Math.abs(dx)>10||Math.abs(dy)>10)return;
+  if(isFocused){unfocus();return;}
+  const t=e.changedTouches[0];setPtr(t.clientX,t.clientY);
+  ray.setFromCamera(ptr,camera);
+  const hits=ray.intersectObjects(meshes);
+  if(hits.length>0)focusOn(hits[0].object);
+},{passive:true});
+
+/* ── GRAIN ── */
+const gc=document.getElementById('grain'),gx=gc.getContext('2d');
+function grain(){gc.width=innerWidth;gc.height=innerHeight;const d=gx.createImageData(innerWidth,innerHeight);for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255|0;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=13;}gx.putImageData(d,0,0);}
+grain();setInterval(grain,90);
+
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+
+/* ── RENDER LOOP ── */
+const clock=new THREE.Clock();
+const _wp=new THREE.Vector3();
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=clock.getDelta(),now=Date.now()*0.001;
+
+  if(tweening){
+    tweenT=Math.min(tweenT+dt/DUR,1);
+    const e=ease(tweenT);
+    camera.position.lerpVectors(cFrom,cTo,e);
+    controls.target.lerpVectors(tFrom,tTo,e);
+    if(tweenT>=1){tweening=false;if(!tweenFocus){controls.enabled=true;controls.update();}}
+  }
+
+  if(gyroMode){
+    /* camera quaternion driven by deviceorientation event — nothing to do here */
+  } else if(isFocused&&focused){
+    focused.getWorldPosition(_wp);camera.lookAt(_wp);
+  } else if(!tweening){
+    controls.update();
+  }
+
+  construct.rotation.y=now*0.045;
+  construct.rotation.x=Math.sin(now*0.018)*0.07;
+  redLight.intensity=1.8+Math.sin(now*1.9)*0.4;
+  if(!isFocused&&!gyroMode) meshes.forEach((m,i)=>{m.rotation.z=Math.sin(now*0.38+i*0.85)*0.025;});
+
+  renderer.render(scene,camera);
+}
+animate();
+</script>
 </body>
 </html>
-<!-- RESPONSIVE injected -->
-<style>
-@media(max-width:768px){
-  .nav{padding:0.85rem 1.25rem;}
-  .title{font-size:clamp(3rem,14vw,5rem);}
-  .bg-text{font-size:clamp(5rem,18vw,10rem);}
-  .sub{font-size:0.6rem;}
-  .btn-back{padding:12px 20px;}
-}
-</style>
