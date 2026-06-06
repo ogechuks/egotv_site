@@ -15,35 +15,23 @@ body{background:#000;overflow:hidden;font-family:'Space Mono',monospace;cursor:c
 .nav-back:hover{color:#FF1A1A;}
 #canvas{position:fixed;inset:0;width:100%;height:100%;}
 .grain{position:fixed;inset:0;pointer-events:none;z-index:50;opacity:0.14;mix-blend-mode:overlay;}
-
-/* HUD */
 .hud{position:fixed;bottom:2.5rem;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;align-items:center;gap:0.5rem;pointer-events:none;}
 .hud-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:0.12em;color:#fff;opacity:0;transition:opacity 0.4s;text-align:center;}
 .hud-hint{font-size:0.44rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,0.2);text-align:center;transition:opacity 0.4s;}
-
-/* FOCUS BACK */
 .focus-back{position:fixed;bottom:2.5rem;right:2.5rem;z-index:100;font-size:0.5rem;letter-spacing:0.2em;text-transform:uppercase;color:#FF1A1A;border:1px solid rgba(255,26,26,0.3);padding:0.7rem 1.2rem;cursor:crosshair;opacity:0;pointer-events:none;transition:opacity 0.4s,background 0.2s;background:transparent;font-family:'Space Mono',monospace;}
 .focus-back:hover{background:rgba(255,26,26,0.08);}
 .focus-back.visible{opacity:1;pointer-events:all;}
-
-/* AUDIO */
 .audio-btn{position:fixed;bottom:2.5rem;left:2.5rem;z-index:100;font-size:0.5rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.3);border:1px solid rgba(255,255,255,0.08);padding:0.7rem 1.2rem;cursor:crosshair;transition:color 0.2s,border-color 0.2s;background:transparent;font-family:'Space Mono',monospace;}
 .audio-btn:hover{color:#FF1A1A;border-color:rgba(255,26,26,0.3);}
-
-/* GYRO TOGGLE — mobile only */
 .gyro-btn{position:fixed;top:5rem;right:1.25rem;z-index:100;font-size:0.48rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.35);border:1px solid rgba(255,255,255,0.1);padding:0.55rem 0.9rem;cursor:pointer;transition:color 0.2s,border-color 0.2s,background 0.2s;background:transparent;font-family:'Space Mono',monospace;display:none;}
 .gyro-btn.active{color:#FF1A1A;border-color:rgba(255,26,26,0.4);background:rgba(255,26,26,0.06);}
 @media(max-width:768px){.gyro-btn{display:block;}}
-
-/* GYRO HINT */
 .gyro-hint{position:fixed;bottom:6rem;left:50%;transform:translateX(-50%);z-index:150;display:flex;flex-direction:column;align-items:center;gap:0.75rem;opacity:0;pointer-events:none;transition:opacity 0.6s;}
 .gyro-hint.show{opacity:1;}
 .hint-phone{width:28px;height:44px;border:2px solid rgba(255,26,26,0.8);border-radius:5px;position:relative;animation:phonetilt 1.8s ease-in-out infinite;}
 .hint-phone::after{content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:rgba(255,26,26,0.7);}
 @keyframes phonetilt{0%{transform:rotate(-18deg);}50%{transform:rotate(18deg);}100%{transform:rotate(-18deg);}}
 .hint-text{font-size:0.44rem;letter-spacing:0.25em;text-transform:uppercase;color:rgba(255,255,255,0.45);text-align:center;line-height:1.9;white-space:nowrap;}
-
-/* LOADER */
 .loader{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;transition:opacity 0.8s;}
 .loader.done{opacity:0;pointer-events:none;}
 .loader-logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:0.15em;color:#fff;}
@@ -51,8 +39,6 @@ body{background:#000;overflow:hidden;font-family:'Space Mono',monospace;cursor:c
 .loader-text{font-size:0.48rem;letter-spacing:0.35em;text-transform:uppercase;color:rgba(255,255,255,0.25);}
 .loader-bar{width:140px;height:1px;background:rgba(255,255,255,0.08);}
 .loader-fill{height:100%;background:#FF1A1A;width:0%;transition:width 0.4s;}
-
-/* ENTER SCREEN — mobile tap-to-enter (unlocks audio + gyro in one gesture) */
 .enter-screen{position:fixed;inset:0;z-index:210;background:rgba(0,0,0,0.92);display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;cursor:pointer;}
 .enter-screen.show{display:flex;}
 .enter-logo{font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:0.12em;color:#fff;}
@@ -60,7 +46,6 @@ body{background:#000;overflow:hidden;font-family:'Space Mono',monospace;cursor:c
 .enter-sub{font-size:0.5rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,0.3);}
 .enter-btn-inner{font-size:0.55rem;letter-spacing:0.25em;text-transform:uppercase;color:#000;background:#FF1A1A;padding:1rem 2.2rem;font-family:'Space Mono',monospace;animation:pulse-btn 2s ease-in-out infinite;}
 @keyframes pulse-btn{0%,100%{box-shadow:0 0 0 0 rgba(255,26,26,0.4);}50%{box-shadow:0 0 0 10px rgba(255,26,26,0);}}
-
 @media(max-width:768px){
   .nav{padding:0.85rem 1.25rem;}
   .focus-back,.audio-btn{bottom:1.5rem;}
@@ -71,42 +56,33 @@ body{background:#000;overflow:hidden;font-family:'Space Mono',monospace;cursor:c
 </style>
 </head>
 <body>
-
 <nav class="nav">
   <a class="nav-logo" href="egotv.html">EGO <span>TV</span></a>
   <a href="egotv.html" class="nav-back">← Agency</a>
 </nav>
-
 <canvas id="canvas"></canvas>
 <canvas class="grain" id="grain"></canvas>
-
 <div class="hud">
   <div class="hud-title" id="hudTitle"></div>
   <div class="hud-hint" id="hudHint">Drag to orbit &nbsp;·&nbsp; Scroll to zoom &nbsp;·&nbsp; Click to focus</div>
 </div>
-
 <button class="focus-back" id="focusBack">← Back to gallery</button>
 <button class="audio-btn"  id="audioBtn">♪ Mute</button>
 <button class="gyro-btn"   id="gyroBtn">↻ Orbit mode</button>
-
 <div class="gyro-hint" id="gyroHint">
   <div class="hint-phone"></div>
   <div class="hint-text">Move your phone to explore</div>
 </div>
-
 <div class="loader" id="loader">
   <div class="loader-logo">EGO <span>TV</span></div>
   <div class="loader-text">Entering the gallery</div>
   <div class="loader-bar"><div class="loader-fill" id="loaderFill"></div></div>
 </div>
-
-<!-- Mobile enter screen — fires user gesture to unlock audio + gyro -->
 <div class="enter-screen" id="enterScreen">
   <div class="enter-logo">EGO <span>TV</span></div>
   <div class="enter-sub">Photography Gallery</div>
   <div class="enter-btn-inner">Tap to Enter</div>
 </div>
-
 <audio id="bgAudio" loop preload="auto">
   <source src="assets/ego-tv-audio.mp3" type="audio/mpeg">
 </audio>
@@ -119,16 +95,24 @@ body{background:#000;overflow:hidden;font-family:'Space Mono',monospace;cursor:c
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-/* ── HELPERS ── */
+/* ── IMAGES — rename your photos 1.jpg through 20.jpg in assets/ ── */
+const IMAGES = [
+  'assets/1.jpg','assets/2.jpg','assets/3.jpg','assets/4.jpg',
+  'assets/5.jpg','assets/6.jpg','assets/7.jpg','assets/8.jpg',
+  'assets/9.jpg','assets/10.jpg','assets/11.jpg','assets/12.jpg',
+  'assets/13.jpg','assets/14.jpg','assets/15.jpg','assets/16.jpg',
+  'assets/17.jpg','assets/18.jpg','assets/19.jpg','assets/20.jpg'
+];
+const COUNT    = 20;
+const SPHERE_R = 5.5;
+const PW = 1.08, PH = 1.35;
 const isMobile = () => window.innerWidth <= 768 || ('ontouchstart' in window);
 
 /* ── SCENE ── */
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
-
 const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
 camera.position.set(0, 0, 0.01);
-
 const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('canvas'),antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
@@ -136,13 +120,10 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 /* ── CONTROLS ── */
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping   = true;
-controls.dampingFactor   = 0.06;
-controls.minDistance     = 0.3;
-controls.maxDistance     = 14;
-controls.autoRotate      = true;
-controls.autoRotateSpeed = 0.4;
-controls.enablePan       = false;
+controls.enableDamping = true; controls.dampingFactor = 0.06;
+controls.minDistance = 0.3; controls.maxDistance = 14;
+controls.autoRotate = true; controls.autoRotateSpeed = 0.4;
+controls.enablePan = false;
 
 /* ── LIGHTS ── */
 scene.add(new THREE.AmbientLight(0xffffff, 1.2));
@@ -167,98 +148,138 @@ for(let i=0;i<32;i++){
 });
 
 /* ── IMAGES ── */
-const imageGroup=new THREE.Group();
+const imageGroup = new THREE.Group();
 scene.add(imageGroup);
-const meshes=[];
-function goldenPt(i,n,r){const phi=Math.acos(1-2*(i+0.5)/n),theta=Math.PI*(1+Math.sqrt(5))*i;return new THREE.Vector3(r*Math.sin(phi)*Math.cos(theta),r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta));}
+const meshes = [];
 
-const PHOTO_TITLES=['Untitled I','Untitled II','Untitled III','Untitled IV','Untitled V','Untitled VI','Untitled VII','Untitled VIII','Untitled IX','Untitled X','Untitled XI','Untitled XII'];
-const COUNT=12,SPHERE_R=5.5,PW=1.08,PH=1.35;
+function goldenPt(i,n,r){
+  const phi=Math.acos(1-2*(i+0.5)/n), theta=Math.PI*(1+Math.sqrt(5))*i;
+  return new THREE.Vector3(r*Math.sin(phi)*Math.cos(theta), r*Math.cos(phi), r*Math.sin(phi)*Math.sin(theta));
+}
 
-const loaderFill=document.getElementById('loaderFill');
-loaderFill.style.width='30%';
+/* TAP label — rendered as a sprite above each image */
+function makeTapSprite(){
+  const canvas = document.createElement('canvas');
+  canvas.width = 200; canvas.height = 60;
+  const ctx = canvas.getContext('2d');
+  ctx.font = '500 22px Space Mono, monospace';
+  ctx.letterSpacing = '6px';
+  ctx.fillStyle = 'rgba(255,26,26,0.85)';
+  ctx.textAlign = 'center';
+  ctx.fillText('TAP', 100, 38);
+  const tex = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.SpriteMaterial({map:tex, transparent:true, opacity:0.9, depthTest:false});
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(0.55, 0.18, 1);
+  sprite.position.set(0, PH/2 + 0.18, 0);
+  return sprite;
+}
 
-let sceneReady=false;
-new THREE.TextureLoader().load('assets/egoTV_logo.png',tex=>{
-  tex.colorSpace=THREE.SRGBColorSpace;
-  loaderFill.style.width='80%';
-  const geo=new THREE.PlaneGeometry(PW,PH);
+const loaderFill = document.getElementById('loaderFill');
+loaderFill.style.width = '10%';
+
+/* load all textures in parallel */
+let loaded = 0;
+const textures = new Array(COUNT);
+
+function onAllLoaded(){
+  const geo = new THREE.PlaneGeometry(PW, PH);
   for(let i=0;i<COUNT;i++){
-    const mat=new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide});
-    const mesh=new THREE.Mesh(geo,mat);
-    const pos=goldenPt(i,COUNT,SPHERE_R);
-    mesh.position.copy(pos);mesh.lookAt(0,0,0);
-    const edges=new THREE.LineSegments(new THREE.EdgesGeometry(geo),new THREE.LineBasicMaterial({color:0xFF1A1A,transparent:true,opacity:0.25}));
+    const mat  = new THREE.MeshBasicMaterial({map:textures[i], side:THREE.DoubleSide});
+    const mesh = new THREE.Mesh(geo, mat);
+    const pos  = goldenPt(i, COUNT, SPHERE_R);
+    mesh.position.copy(pos);
+    mesh.lookAt(0, 0, 0);
+
+    /* red border */
+    const edges = new THREE.LineSegments(
+      new THREE.EdgesGeometry(geo),
+      new THREE.LineBasicMaterial({color:0xFF1A1A, transparent:true, opacity:0.25})
+    );
     mesh.add(edges);
-    mesh.userData={title:PHOTO_TITLES[i],edges};
-    imageGroup.add(mesh);meshes.push(mesh);
+
+    /* tap sprite */
+    const tap = makeTapSprite();
+    mesh.add(tap);
+    tap.visible = true;
+
+    mesh.userData = {edges, tap, highlighted:false};
+    imageGroup.add(mesh);
+    meshes.push(mesh);
   }
-  loaderFill.style.width='100%';
-  sceneReady=true;
+
+  loaderFill.style.width = '100%';
   setTimeout(()=>{
     document.getElementById('loader').classList.add('done');
-    /* Show enter screen on mobile, auto-start on desktop */
     if(isMobile()){
       document.getElementById('enterScreen').classList.add('show');
     } else {
       tryPlayAudio();
     }
-  },700);
-},undefined,()=>{
-  loaderFill.style.width='100%';
-  setTimeout(()=>document.getElementById('loader').classList.add('done'),400);
+  }, 700);
+}
+
+const txLoader = new THREE.TextureLoader();
+IMAGES.forEach((src, i) => {
+  txLoader.load(src, tex => {
+    tex.colorSpace = THREE.SRGBColorSpace;
+    textures[i] = tex;
+    loaded++;
+    loaderFill.style.width = (10 + (loaded/COUNT)*85) + '%';
+    if(loaded === COUNT) onAllLoaded();
+  }, undefined, () => {
+    /* if an image fails, use a fallback dark texture */
+    const fb = new THREE.DataTexture(new Uint8Array([20,20,20,255]),1,1);
+    fb.colorSpace = THREE.SRGBColorSpace;
+    textures[i] = fb;
+    loaded++;
+    loaderFill.style.width = (10 + (loaded/COUNT)*85) + '%';
+    if(loaded === COUNT) onAllLoaded();
+  });
 });
 
 /* ── AUDIO ── */
-const audio=document.getElementById('bgAudio');
-const aBtn =document.getElementById('audioBtn');
-audio.volume=0;
+const audio = document.getElementById('bgAudio');
+const aBtn  = document.getElementById('audioBtn');
+audio.volume = 0;
 
 function fadeIn(tgt,ms){
   const s=80,iv=ms/s,step=tgt/s;let n=0;
   const t=setInterval(()=>{n++;audio.volume=Math.min(tgt,step*n);if(n>=s)clearInterval(t);},iv);
 }
-
 function tryPlayAudio(){
   audio.play().then(()=>{fadeIn(0.12,5000);aBtn.textContent='♪ Mute';}).catch(()=>{aBtn.textContent='♪ Play';});
 }
-
 aBtn.addEventListener('click',()=>{
   if(audio.paused){audio.play();fadeIn(0.12,2000);aBtn.textContent='♪ Mute';}
   else{audio.pause();aBtn.textContent='♪ Play';}
 });
 
-/* ── ENTER SCREEN — one tap unlocks audio + gyro on mobile ── */
-const enterScreen=document.getElementById('enterScreen');
+/* ── ENTER SCREEN ── */
+const enterScreen = document.getElementById('enterScreen');
 enterScreen.addEventListener('click',()=>{
   enterScreen.classList.remove('show');
   tryPlayAudio();
-
-  /* request gyro permission here — inside user gesture, required by iOS */
   if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){
     DeviceOrientationEvent.requestPermission()
       .then(r=>{ if(r==='granted') startGyro(); else startOrbit(); })
       .catch(()=>startOrbit());
   } else {
-    /* Android and non-iOS — permission not needed, start gyro directly */
     startGyro();
   }
 },{once:true});
 
-/* ── GYROSCOPE ── */
-let gyroMode=false;
-const gyroBtn =document.getElementById('gyroBtn');
-const gyroHint=document.getElementById('gyroHint');
-const hudHint =document.getElementById('hudHint');
-
-/* Rotation quaternions for converting device orientation to camera rotation */
+/* ── GYRO ── */
+let gyroMode = false;
+const gyroBtn  = document.getElementById('gyroBtn');
+const gyroHint = document.getElementById('gyroHint');
+const hudHint  = document.getElementById('hudHint');
 const q0 = new THREE.Quaternion();
 const q1 = new THREE.Quaternion(-Math.sqrt(0.5),0,0,Math.sqrt(0.5));
 const euler = new THREE.Euler();
 
 function onOrientation(e){
   if(!gyroMode) return;
-  /* alpha=compass, beta=front-back tilt, gamma=left-right tilt */
   euler.set(
     THREE.MathUtils.degToRad(e.beta  || 0),
     THREE.MathUtils.degToRad(e.alpha || 0),
@@ -271,55 +292,59 @@ function onOrientation(e){
 }
 window.addEventListener('deviceorientation', onOrientation, true);
 
-function showHint(){
+function showGyroHint(){
   gyroHint.classList.add('show');
-  setTimeout(()=>gyroHint.classList.remove('show'),3500);
+  setTimeout(()=>gyroHint.classList.remove('show'), 3500);
 }
 
 function startGyro(){
-  gyroMode=true;
-  controls.enabled=false;
-  controls.autoRotate=false;
+  gyroMode = true;
+  controls.enabled = false;
+  controls.autoRotate = false;
   camera.position.set(0,0,0);
-  gyroBtn.textContent='↻ Orbit mode';
+  gyroBtn.textContent = '↻ Orbit mode';
   gyroBtn.classList.add('active');
-  hudHint.textContent='Move your phone to explore';
-  showHint();
+  hudHint.textContent = 'Move your phone · Tap to highlight';
+  showGyroHint();
+  /* show tap sprites in gyro mode */
+  meshes.forEach(m=>m.userData.tap.visible=true);
 }
 
 function startOrbit(){
-  gyroMode=false;
-  controls.enabled=true;
-  controls.autoRotate=true;
+  gyroMode = false;
+  controls.enabled = true;
+  controls.autoRotate = true;
   camera.position.set(0,0,0.01);
   camera.quaternion.set(0,0,0,1);
   controls.target.set(0,0,0);
   controls.update();
-  gyroBtn.textContent='⊙ Gyro mode';
+  gyroBtn.textContent = '⊙ Gyro mode';
   gyroBtn.classList.remove('active');
-  hudHint.textContent='Drag to orbit · Scroll to zoom · Click to focus';
+  hudHint.textContent = 'Drag to orbit · Scroll to zoom · Click to focus';
+  /* show tap sprites in orbit mode too */
+  meshes.forEach(m=>m.userData.tap.visible=true);
 }
 
 gyroBtn.addEventListener('click',()=>{
-  if(gyroMode) startOrbit();
-  else {
-    /* toggling to gyro after initial load — may need permission again on iOS */
+  if(gyroMode){startOrbit();}
+  else{
     if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){
       DeviceOrientationEvent.requestPermission().then(r=>{if(r==='granted')startGyro();}).catch(()=>{});
-    } else {
-      startGyro();
-    }
+    } else {startGyro();}
   }
 });
 
-/* ── FOCUS ── */
-const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();
-let hovered=null,focused=null,isFocused=false;
-const hudTitle=document.getElementById('hudTitle');
-const fbBtn   =document.getElementById('focusBack');
+/* ── FOCUS / HIGHLIGHT ── */
+const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+let hovered=null, focused=null, isFocused=false;
+let gyroHighlighted = null; /* highlighted mesh in gyro mode */
+
+const hudTitle = document.getElementById('hudTitle');
+const fbBtn    = document.getElementById('focusBack');
 
 function setPtr(cx,cy){ptr.x=(cx/innerWidth)*2-1;ptr.y=-(cy/innerHeight)*2+1;}
 
+/* tween */
 const cFrom=new THREE.Vector3(),cTo=new THREE.Vector3();
 const tFrom=new THREE.Vector3(),tTo=new THREE.Vector3();
 let tweenT=0,tweening=false,tweenFocus=false;
@@ -333,59 +358,105 @@ function startTween(camTo,tgtTo,forFocus){
   controls.enabled=false;
 }
 
+/* orbit mode focus */
 function focusOn(mesh){
-  if(gyroMode)return;
   if(isFocused&&focused===mesh)return;
   isFocused=true;focused=mesh;controls.autoRotate=false;
   const wp=new THREE.Vector3();mesh.getWorldPosition(wp);
   startTween(wp.clone().sub(wp.clone().normalize().multiplyScalar(1.6)),wp,true);
-  hudTitle.textContent=mesh.userData.title;hudTitle.style.opacity='1';
-  hudHint.style.opacity='0';fbBtn.classList.add('visible');
-  meshes.forEach(m=>{m.material.opacity=m===mesh?1:0.07;m.userData.edges.material.opacity=m===mesh?1:0;});
+  hudTitle.style.opacity='0';
+  hudHint.style.opacity='0';
+  fbBtn.classList.add('visible');
+  meshes.forEach(m=>{
+    m.material.opacity=m===mesh?1:0.07;
+    m.userData.edges.material.opacity=m===mesh?1:0;
+    m.userData.tap.visible=false;
+  });
 }
 
 function unfocus(){
   isFocused=false;focused=null;controls.autoRotate=true;
   startTween(new THREE.Vector3(0,0,0.01),new THREE.Vector3(0,0,0),false);
-  hudTitle.style.opacity='0';hudHint.style.opacity='1';fbBtn.classList.remove('visible');
-  meshes.forEach(m=>{m.material.opacity=1;m.userData.edges.material.opacity=0.25;});
+  hudTitle.style.opacity='0';hudHint.style.opacity='1';
+  fbBtn.classList.remove('visible');
+  meshes.forEach(m=>{
+    m.material.opacity=1;
+    m.userData.edges.material.opacity=0.25;
+    m.userData.tap.visible=true;
+  });
 }
 fbBtn.addEventListener('click',unfocus);
 
+/* gyro mode highlight — just glows the tapped image */
+function gyroHighlight(mesh){
+  if(gyroHighlighted===mesh)return;
+  /* reset previous */
+  if(gyroHighlighted){
+    gyroHighlighted.userData.edges.material.opacity=0.25;
+    gyroHighlighted.material.opacity=1;
+  }
+  gyroHighlighted=mesh;
+  mesh.userData.edges.material.opacity=1.0;
+  mesh.material.opacity=1;
+  /* dim others slightly */
+  meshes.forEach(m=>{if(m!==mesh) m.material.opacity=0.45;});
+}
+
+function clearGyroHighlight(){
+  if(gyroHighlighted){
+    gyroHighlighted.userData.edges.material.opacity=0.25;
+    gyroHighlighted=null;
+  }
+  meshes.forEach(m=>m.material.opacity=1);
+}
+
+/* ── EVENTS ── */
 window.addEventListener('mousemove',e=>{
   if(isFocused||gyroMode)return;
-  setPtr(e.clientX,e.clientY);ray.setFromCamera(ptr,camera);
+  setPtr(e.clientX,e.clientY);
+  ray.setFromCamera(ptr,camera);
   const hits=ray.intersectObjects(meshes);
   if(hits.length>0){
     const m=hits[0].object;
     if(hovered!==m){if(hovered)hovered.userData.edges.material.opacity=0.25;hovered=m;m.userData.edges.material.opacity=0.8;}
-    hudTitle.textContent=m.userData.title;hudTitle.style.opacity='0.5';
     document.body.style.cursor='pointer';
   } else {
     if(hovered){hovered.userData.edges.material.opacity=0.25;hovered=null;}
-    hudTitle.style.opacity='0';document.body.style.cursor='crosshair';
+    document.body.style.cursor='crosshair';
   }
 });
 
 window.addEventListener('click',e=>{
-  if(e.target===fbBtn||e.target===aBtn||e.target===gyroBtn||gyroMode)return;
-  setPtr(e.clientX,e.clientY);ray.setFromCamera(ptr,camera);
+  if(e.target===fbBtn||e.target===aBtn||e.target===gyroBtn)return;
+  setPtr(e.clientX,e.clientY);
+  ray.setFromCamera(ptr,camera);
   const hits=ray.intersectObjects(meshes);
-  if(hits.length>0)focusOn(hits[0].object);
-  else if(isFocused)unfocus();
+  if(gyroMode){
+    /* gyro: tap just highlights */
+    if(hits.length>0) gyroHighlight(hits[0].object);
+    else clearGyroHighlight();
+  } else {
+    if(hits.length>0) focusOn(hits[0].object);
+    else if(isFocused) unfocus();
+  }
 });
 
 let tx=0,ty=0;
 window.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
 window.addEventListener('touchend',e=>{
-  if(gyroMode)return;
-  const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+  const dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty;
   if(Math.abs(dx)>10||Math.abs(dy)>10)return;
-  if(isFocused){unfocus();return;}
-  const t=e.changedTouches[0];setPtr(t.clientX,t.clientY);
+  const t=e.changedTouches[0];
+  setPtr(t.clientX,t.clientY);
   ray.setFromCamera(ptr,camera);
   const hits=ray.intersectObjects(meshes);
-  if(hits.length>0)focusOn(hits[0].object);
+  if(gyroMode){
+    if(hits.length>0) gyroHighlight(hits[0].object);
+    else clearGyroHighlight();
+  } else {
+    if(isFocused){unfocus();return;}
+    if(hits.length>0) focusOn(hits[0].object);
+  }
 },{passive:true});
 
 /* ── GRAIN ── */
@@ -401,7 +472,7 @@ const _wp=new THREE.Vector3();
 
 function animate(){
   requestAnimationFrame(animate);
-  const dt=clock.getDelta(),now=Date.now()*0.001;
+  const dt=clock.getDelta(), now=Date.now()*0.001;
 
   if(tweening){
     tweenT=Math.min(tweenT+dt/DUR,1);
@@ -412,7 +483,7 @@ function animate(){
   }
 
   if(gyroMode){
-    /* camera quaternion driven by deviceorientation event — nothing to do here */
+    /* quaternion set by deviceorientation event */
   } else if(isFocused&&focused){
     focused.getWorldPosition(_wp);camera.lookAt(_wp);
   } else if(!tweening){
@@ -422,7 +493,14 @@ function animate(){
   construct.rotation.y=now*0.045;
   construct.rotation.x=Math.sin(now*0.018)*0.07;
   redLight.intensity=1.8+Math.sin(now*1.9)*0.4;
-  if(!isFocused&&!gyroMode) meshes.forEach((m,i)=>{m.rotation.z=Math.sin(now*0.38+i*0.85)*0.025;});
+
+  if(!isFocused&&!gyroMode){
+    meshes.forEach((m,i)=>{m.rotation.z=Math.sin(now*0.38+i*0.85)*0.025;});
+  }
+
+  /* pulse tap sprite opacity */
+  const tapOpacity=0.5+Math.sin(now*2)*0.4;
+  meshes.forEach(m=>{if(m.userData.tap.visible) m.userData.tap.material.opacity=Math.max(0.1,tapOpacity);});
 
   renderer.render(scene,camera);
 }
