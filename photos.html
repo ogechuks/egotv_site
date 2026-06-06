@@ -84,7 +84,7 @@ body{background:#000;overflow:hidden;font-family:'Space Mono',monospace;cursor:c
   <div class="enter-btn-inner">Tap to Enter</div>
 </div>
 <audio id="bgAudio" loop preload="auto">
-  <source src="assets/ego-tv-audio.m4a" type="audio/mpeg">
+  <source src="assets/ego-tv-audio.m4a" type="audio/mp4">
 </audio>
 
 <script type="importmap">
@@ -250,6 +250,12 @@ audio.volume=0;
 
 window.addEventListener('pagehide',()=>{ audio.pause(); audio.currentTime=0; });
 window.addEventListener('beforeunload',()=>{ audio.pause(); });
+/* visibilitychange is most reliable on mobile Safari */
+document.addEventListener('visibilitychange',()=>{ if(document.hidden){ audio.pause(); } });
+/* intercept nav links so audio stops before navigation */
+document.querySelectorAll('a[href]').forEach(a=>{
+  a.addEventListener('click',()=>{ audio.pause(); audio.currentTime=0; });
+});
 
 function fadeIn(tgt,ms){
   const s=80,iv=ms/s,step=tgt/s;let n=0;
