@@ -211,8 +211,10 @@ function onAllLoaded(){
     const pos=goldenPt(i,COUNT,SPHERE_R);
     mesh.position.copy(pos);mesh.lookAt(0,0,0);
     const edges=new THREE.LineSegments(new THREE.EdgesGeometry(geo),new THREE.LineBasicMaterial({color:0xFF1A1A,transparent:true,opacity:0.25}));
+    edges.layers.set(1);
     mesh.add(edges);
     const tap=makeTapSprite();
+    tap.layers.set(1);
     mesh.add(tap);
     tap.visible=true;
     mesh.userData={edges,tap};
@@ -327,6 +329,8 @@ gyroBtn.addEventListener('click',()=>{
 
 /* ── FOCUS ── */
 const ray=new THREE.Raycaster();
+/* only intersect the image meshes themselves, not their sprite/edge children */
+ray.layers.set(0);
 const ptr=new THREE.Vector2();
 /* throttle raycasting — only cast every N frames to save CPU on low-end */
 const RAY_INTERVAL=LOW?3:1;
@@ -363,9 +367,13 @@ function focusOn(mesh){
 }
 
 function unfocus(){
-  isFocused=false;focused=null;controls.autoRotate=true;
+  isFocused=false;
+  focused=null;
+  controls.autoRotate=true;
   startTween(new THREE.Vector3(0,0,0.01),new THREE.Vector3(0,0,0),false);
-  hudTitle.style.opacity='0';hudHint.style.opacity='1';fbBtn.classList.remove('visible');
+  hudTitle.style.opacity='0';
+  hudHint.style.opacity='1';
+  fbBtn.classList.remove('visible');
   meshes.forEach(m=>{
     m.material.opacity=1;
     m.userData.edges.material.opacity=0.25;
@@ -450,7 +458,7 @@ function animate(){
 
   if(gyroMode){
     /* quaternion driven by deviceorientation event */
-  } else if(isFocused&&focused){
+  } else if(isFocused && focused && !tweening){
     focused.getWorldPosition(_wp);camera.lookAt(_wp);
   } else if(!tweening){
     controls.update();
