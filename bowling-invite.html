@@ -287,6 +287,18 @@
     opacity:.55;
     margin-top:14px;
   }
+  .note-card{
+    background:transparent;
+    border:1px dashed var(--amber-dim);
+    border-radius:6px;
+    padding:10px 14px;
+    max-width:300px;
+    margin:0 auto 4px;
+    font-size:1.05rem;
+    line-height:1.35;
+    color:var(--paper);
+    opacity:.85;
+  }
 </style>
 </head>
 <body>
@@ -318,6 +330,7 @@
             <h2>HIGH SCORES / RSVPs</h2>
             <ol id="scoreList"></ol>
           </div>
+          <div id="syncStatus" style="font-size:0.95rem; opacity:.55; margin:-10px 0 14px;"></div>
           <p class="copy">are you in for the birthday bowl?</p>
           <div class="btn-row">
             <button class="btn btn-yes" id="yesBtn">YES, I'M IN</button>
@@ -340,6 +353,7 @@
             <div class="addr-line" style="margin-top:8px;">Friday, 11 September · 6:00 PM</div>
             <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=The+Fun+Company+The+Zone+Rosebank+Johannesburg" target="_blank" rel="noopener">get directions &raquo;</a>
           </div>
+          <div class="note-card">Fun Company works on a tap-and-pay system, so heads up: it's R85pp for a round. You'll load your own card if you have one. If not, we can use mine at the kiosk when we get there.</div>
           <div class="btn-row">
             <button class="btn btn-ghost" id="backBtn">&laquo; back to scoreboard</button>
           </div>
@@ -376,6 +390,11 @@
 
   var currentName = '';
   var cachedEntries = loadCache();
+  var syncStatus = document.getElementById('syncStatus');
+
+  function setSyncStatus(text){
+    if (syncStatus) syncStatus.textContent = text;
+  }
 
   function loadCache(){
     try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
@@ -387,16 +406,26 @@
   }
 
   // Pulls the shared list from the Sheet (if SYNC_ENDPOINT is set) and
-  // re-renders once it arrives. Falls back to whatever is cached locally.
+  // re-renders once it arrives. Falls back to whatever is cached locally,
+  // and reports what happened in the syncStatus line so a failure is
+  // visible on the page itself, not just in the dev console.
   function refreshFromServer(){
-    if (!SYNC_ENDPOINT) return;
-    fetch(SYNC_ENDPOINT)
-      .then(function(r){ return r.json(); })
+    if (!SYNC_ENDPOINT){ setSyncStatus(''); return; }
+    setSyncStatus('syncing…');
+    fetch(SYNC_ENDPOINT + '?t=' + Date.now(), { cache: 'no-store' })
+      .then(function(r){
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
       .then(function(entries){
         saveCache(entries);
         renderScoreboard();
+        setSyncStatus('');
       })
-      .catch(function(){ /* offline or not deployed yet — keep local cache */ });
+      .catch(function(err){
+        console.error('EGO TV RSVP sync failed:', err);
+        setSyncStatus('showing names saved on this device only — sync failed');
+      });
   }
 
   // text/plain avoids a CORS preflight, which Apps Script Web Apps don't
@@ -408,7 +437,10 @@
       headers:{'Content-Type':'text/plain;charset=utf-8'},
       body: JSON.stringify(entry)
     }).then(function(){ refreshFromServer(); })
-      .catch(function(){ /* still saved locally, will retry via localStorage */ });
+      .catch(function(err){
+        console.error('EGO TV RSVP push failed:', err);
+        setSyncStatus('saved on this device only — could not reach the sheet');
+      });
   }
 
   function upsertEntry(name, rsvp){
