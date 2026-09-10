@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EGO TV — Birthday Bowling Celebration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0a0a0a;
+    --cabinet:#161414;
+    --cabinet-edge:#242020;
+    --screen-bg:#0b0b0b;
+    --amber:#e2131f;
+    --amber-dim:#5c0b10;
+    --cyan:#ff2f39;
+    --magenta:#000000;
+    --wood:#c9914f;
+    --wood-dark:#8a5a2b;
+    --felt:#2a0709;
+    --paper:#f2e8d5;
+    --paper-line:#d8c9a3;
+    --ink:#26201a;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(ellipse at 50% 20%, #1a1620 0%, var(--void) 65%);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:28px 14px;
+    font-family:'VT323', monospace;
+    color:var(--paper);
+  }
+
+  /* ---------- Arcade cabinet shell ---------- */
+  .cabinet{
+    position:relative;
+    width:100%;
+    max-width:480px;
+    background:linear-gradient(180deg, var(--cabinet-edge), var(--cabinet) 12%, var(--cabinet) 88%, var(--cabinet-edge));
+    border-radius:22px;
+    padding:18px 18px 26px;
+    box-shadow:
+      0 30px 60px rgba(0,0,0,.55),
+      inset 0 0 0 2px #0000006b;
+  }
+  .cabinet::before, .cabinet::after{
+    content:"";
+    position:absolute;
+    top:14px; width:9px; height:9px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, #6b6577, #2a2632);
+  }
+  .cabinet::before{left:14px;}
+  .cabinet::after{right:14px;}
+
+  .marquee{
+    text-align:center;
+    padding:14px 10px 16px;
+    font-family:'Press Start 2P', monospace;
+    font-size:0.62rem;
+    line-height:1.9;
+    color:var(--amber);
+    letter-spacing:.5px;
+    text-shadow:2px 0 0 var(--amber-dim), -1px 0 0 #000;
+  }
+  .marquee .small{
+    display:block;
+    font-size:0.44rem;
+    color:var(--paper);
+    margin-top:6px;
+    text-shadow:none;
+    opacity:.75;
+  }
+
+  /* ---------- Screen ---------- */
+  .screen-frame{
+    background:#050505;
+    border-radius:10px;
+    padding:8px;
+    box-shadow: inset 0 0 0 2px #000, inset 0 0 30px rgba(0,0,0,.9);
+  }
+  .screen{
+    position:relative;
+    background:var(--screen-bg);
+    border-radius:6px;
+    min-height:420px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:26px 20px;
+    text-align:center;
+  }
+  .screen::before{ /* scanlines */
+    content:"";
+    position:absolute; inset:0;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.035) 0px,
+      rgba(255,255,255,0.035) 1px,
+      transparent 2px,
+      transparent 3px
+    );
+    pointer-events:none;
+    z-index:5;
+  }
+  .screen::after{ /* vignette */
+    content:"";
+    position:absolute; inset:0;
+    box-shadow: inset 0 0 60px 18px rgba(0,0,0,.75);
+    pointer-events:none;
+    z-index:6;
+  }
+  @keyframes flicker{
+    0%,100%{opacity:1;}
+    92%{opacity:1;}
+    93%{opacity:.86;}
+    94%{opacity:1;}
+  }
+  .screen-inner{
+    position:relative;
+    z-index:1;
+    width:100%;
+    animation:flicker 6s infinite;
+  }
+
+  .view{ display:none; }
+  .view.active{ display:block; animation:fadein .5s ease; }
+  @keyframes fadein{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  h1.headline{
+    font-family:'Press Start 2P', monospace;
+    font-size:0.85rem;
+    color:var(--amber);
+    line-height:1.7;
+    margin:0 0 18px;
+  }
+  p.copy{
+    font-size:1.35rem;
+    color:var(--paper);
+    line-height:1.35;
+    margin:0 0 20px;
+  }
+
+  input.name-input{
+    width:100%;
+    max-width:280px;
+    background:var(--void);
+    border:2px solid var(--amber-dim);
+    color:var(--amber);
+    font-family:'VT323', monospace;
+    font-size:1.4rem;
+    padding:10px 12px;
+    text-align:center;
+    border-radius:4px;
+    outline:none;
+    letter-spacing:1px;
+  }
+  input.name-input:focus{ border-color:var(--amber); }
+  input.name-input::placeholder{ color:var(--amber-dim); }
+
+  .btn{
+    font-family:'Press Start 2P', monospace;
+    font-size:0.6rem;
+    padding:12px 18px;
+    border-radius:6px;
+    border:none;
+    cursor:pointer;
+    margin:8px 6px 0;
+    transition:transform .12s ease;
+  }
+  .btn:active{ transform:scale(.94); }
+  .btn-primary{ background:var(--amber); color:#fff; box-shadow:0 3px 0 var(--amber-dim); }
+  .btn-yes{ background:var(--amber); color:#fff; box-shadow:0 3px 0 var(--amber-dim); }
+  .btn-no{ background:#000; color:var(--amber); border:2px solid var(--amber); box-shadow:0 3px 0 #000; }
+  .btn-ghost{ background:transparent; color:var(--paper); border:2px solid var(--paper-line); box-shadow:none; opacity:.8; }
+  .btn:hover{ filter:brightness(1.08); }
+  .btn-row{ margin-top:22px; }
+
+  /* ---------- Scoreboard ---------- */
+  .scoreboard{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:4px;
+    padding:14px 16px;
+    width:100%;
+    max-width:300px;
+    margin:0 auto 20px;
+    box-shadow:0 4px 0 var(--paper-line);
+  }
+  .scoreboard h2{
+    font-family:'Press Start 2P', monospace;
+    font-size:0.5rem;
+    margin:0 0 10px;
+    letter-spacing:1px;
+  }
+  .scoreboard ol{
+    list-style:none;
+    margin:0; padding:0;
+    text-align:left;
+    max-height:150px;
+    overflow-y:auto;
+  }
+  .scoreboard li{
+    display:flex;
+    justify-content:space-between;
+    font-size:1.15rem;
+    border-bottom:1px dashed var(--paper-line);
+    padding:4px 2px;
+  }
+  .scoreboard li .tag{
+    font-size:0.85rem;
+    font-family:'VT323', monospace;
+    padding:1px 6px;
+    border-radius:3px;
+  }
+  .tag.in{ background:var(--amber); color:#fff; }
+  .tag.out{ background:#000; color:var(--amber); border:1px solid var(--amber); }
+  .tag.pending{ background:var(--paper-line); color:var(--ink); }
+  .scoreboard .empty{ font-size:1.1rem; opacity:.6; padding:6px 0; }
+
+  /* ---------- Animation screen ---------- */
+  canvas#laneCanvas{
+    width:100%;
+    max-width:320px;
+    height:auto;
+    display:block;
+    margin:0 auto;
+    border-radius:4px;
+  }
+  .result-text{
+    font-family:'Press Start 2P', monospace;
+    font-size:0.95rem;
+    margin-top:16px;
+    min-height:1.4em;
+  }
+  .result-text.strike{ color:var(--amber); text-shadow:0 0 10px var(--amber); }
+  .result-text.gutter{ color:var(--paper); opacity:.7; }
+
+  /* ---------- Address reveal ---------- */
+  .address-card{
+    background:var(--felt);
+    border:2px solid var(--amber);
+    border-radius:6px;
+    padding:16px 18px;
+    max-width:300px;
+    margin:0 auto 18px;
+  }
+  .address-card .venue{
+    font-family:'Press Start 2P', monospace;
+    font-size:0.62rem;
+    color:var(--amber);
+    margin-bottom:8px;
+    line-height:1.6;
+  }
+  .address-card .addr-line{
+    font-size:1.3rem;
+    color:var(--paper);
+    line-height:1.3;
+  }
+  a.map-link{
+    display:inline-block;
+    margin-top:12px;
+    color:var(--amber);
+    text-decoration:underline;
+    font-size:1.15rem;
+  }
+
+  .shake{ animation:shake .4s linear; }
+  @keyframes shake{
+    0%,100%{ transform:translate(0,0); }
+    20%{ transform:translate(-3px,2px); }
+    40%{ transform:translate(3px,-2px); }
+    60%{ transform:translate(-2px,-1px); }
+    80%{ transform:translate(2px,1px); }
+  }
+
+  .hint{
+    font-size:1rem;
+    opacity:.55;
+    margin-top:14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="cabinet">
+  <div class="marquee">
+    EGO TV INVITES YOU TO<br>MY BIRTHDAY<br>BOWLING CELEBRATION
+    <span class="small">FRI 11 SEP · 6:00 PM — insert name to continue &raquo;</span>
+  </div>
+
+  <div class="screen-frame">
+    <div class="screen">
+      <div class="screen-inner">
+
+        <!-- VIEW 1: name entry -->
+        <div class="view active" id="view-name">
+          <h1 class="headline">JOIN THE GAME</h1>
+          <p class="copy">type your name to step up to the lane</p>
+          <input type="text" id="nameInput" class="name-input" placeholder="YOUR NAME" maxlength="24" autocomplete="off">
+          <div class="btn-row">
+            <button class="btn btn-primary" id="joinBtn">INSERT NAME</button>
+          </div>
+        </div>
+
+        <!-- VIEW 2: scoreboard + rsvp -->
+        <div class="view" id="view-rsvp">
+          <h1 class="headline" id="rsvpGreeting">READY, PLAYER?</h1>
+          <div class="scoreboard">
+            <h2>HIGH SCORES / RSVPs</h2>
+            <ol id="scoreList"></ol>
+          </div>
+          <p class="copy">are you in for the birthday bowl?</p>
+          <div class="btn-row">
+            <button class="btn btn-yes" id="yesBtn">YES, I'M IN</button>
+            <button class="btn btn-no" id="noBtn">CAN'T MAKE IT</button>
+          </div>
+        </div>
+
+        <!-- VIEW 3: bowling animation -->
+        <div class="view" id="view-anim">
+          <canvas id="laneCanvas" width="320" height="380"></canvas>
+          <div class="result-text" id="resultText"></div>
+        </div>
+
+        <!-- VIEW 4: address reveal -->
+        <div class="view" id="view-reveal">
+          <h1 class="headline" id="revealHeadline">SEE YOU THERE</h1>
+          <div class="address-card">
+            <div class="venue">THE FUN COMPANY<br>THE ZONE @ ROSEBANK</div>
+            <div class="addr-line">177 Oxford Road, Rosebank<br>Johannesburg, 2196</div>
+            <div class="addr-line" style="margin-top:8px;">Friday, 11 September · 6:00 PM</div>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=The+Fun+Company+The+Zone+Rosebank+Johannesburg" target="_blank" rel="noopener">get directions &raquo;</a>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" id="backBtn">&laquo; back to scoreboard</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var STORAGE_KEY = 'egotv-bowling-rsvps';
+
+  // Paste your deployed Google Apps Script Web App URL here (see the
+  // apps-script.gs file for the code + setup steps). With this set, every
+  // visitor's name and RSVP is saved to one shared Google Sheet you can open
+  // any time. Leave it blank and the page still works, but each friend's
+  // browser only remembers their own entry — nobody sees a shared list.
+  var SYNC_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxrQ7XT5zHKcoxg8QPptaOMeWDjhbYdvW-Ids5NJG6jWISS0UJth6OxkqkMBHrFZ3K_/exec';
+
+  var nameInput = document.getElementById('nameInput');
+  var joinBtn = document.getElementById('joinBtn');
+  var scoreList = document.getElementById('scoreList');
+  var rsvpGreeting = document.getElementById('rsvpGreeting');
+  var yesBtn = document.getElementById('yesBtn');
+  var noBtn = document.getElementById('noBtn');
+  var backBtn = document.getElementById('backBtn');
+  var resultText = document.getElementById('resultText');
+  var revealHeadline = document.getElementById('revealHeadline');
+  var canvas = document.getElementById('laneCanvas');
+  var ctx = canvas.getContext('2d');
+  var cabinet = document.querySelector('.cabinet');
+
+  var currentName = '';
+  var cachedEntries = loadCache();
+
+  function loadCache(){
+    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch(e){ return []; }
+  }
+  function saveCache(entries){
+    cachedEntries = entries;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  }
+
+  // Pulls the shared list from the Sheet (if SYNC_ENDPOINT is set) and
+  // re-renders once it arrives. Falls back to whatever is cached locally.
+  function refreshFromServer(){
+    if (!SYNC_ENDPOINT) return;
+    fetch(SYNC_ENDPOINT)
+      .then(function(r){ return r.json(); })
+      .then(function(entries){
+        saveCache(entries);
+        renderScoreboard();
+      })
+      .catch(function(){ /* offline or not deployed yet — keep local cache */ });
+  }
+
+  // text/plain avoids a CORS preflight, which Apps Script Web Apps don't
+  // handle — the .gs code parses the body as JSON regardless of header.
+  function pushToServer(entry){
+    if (!SYNC_ENDPOINT) return;
+    fetch(SYNC_ENDPOINT, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify(entry)
+    }).then(function(){ refreshFromServer(); })
+      .catch(function(){ /* still saved locally, will retry via localStorage */ });
+  }
+
+  function upsertEntry(name, rsvp){
+    var entries = cachedEntries.slice();
+    var existing = entries.find(function(e){ return e.name.toLowerCase() === name.toLowerCase(); });
+    var entry = existing || { name:name, rsvp:rsvp, ts:Date.now() };
+    entry.rsvp = rsvp;
+    entry.ts = Date.now();
+    if (!existing) entries.push(entry);
+    saveCache(entries);
+    pushToServer(entry);
+    return entries;
+  }
+  function renderScoreboard(){
+    var entries = cachedEntries;
+    scoreList.innerHTML = '';
+    if (!entries.length){
+      var li = document.createElement('li');
+      li.className = 'empty';
+      li.textContent = 'no players yet — be the first!';
+      scoreList.appendChild(li);
+      return;
+    }
+    entries.sort(function(a,b){ return a.ts - b.ts; }).forEach(function(e){
+      var li = document.createElement('li');
+      var tagClass = e.rsvp === 'yes' ? 'in' : (e.rsvp === 'no' ? 'out' : 'pending');
+      var tagText = e.rsvp === 'yes' ? 'IN' : (e.rsvp === 'no' ? 'OUT' : '...');
+      li.innerHTML = '<span>' + escapeHtml(e.name) + '</span><span class="tag ' + tagClass + '">' + tagText + '</span>';
+      scoreList.appendChild(li);
+    });
+  }
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+    });
+  }
+
+  function showView(id){
+    document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+  }
+
+  joinBtn.addEventListener('click', function(){
+    var name = nameInput.value.trim();
+    if (!name){ nameInput.focus(); return; }
+    currentName = name;
+    upsertEntry(name, 'pending');
+    renderScoreboard();
+    rsvpGreeting.textContent = 'READY, ' + name.toUpperCase() + '?';
+    showView('view-rsvp');
+    refreshFromServer();
+  });
+  nameInput.addEventListener('keydown', function(e){
+    if (e.key === 'Enter') joinBtn.click();
+  });
+
+  yesBtn.addEventListener('click', function(){ playRound('yes'); });
+  noBtn.addEventListener('click', function(){ playRound('no'); });
+  backBtn.addEventListener('click', function(){
+    renderScoreboard();
+    showView('view-rsvp');
+    refreshFromServer();
+  });
+
+  function playRound(rsvp){
+    upsertEntry(currentName, rsvp);
+    resultText.textContent = '';
+    resultText.className = 'result-text';
+    showView('view-anim');
+    runBowlingAnimation(rsvp === 'yes', function(){
+      revealHeadline.textContent = rsvp === 'yes' ? 'SEE YOU THERE' : 'YOU\'LL BE MISSED';
+      renderScoreboard();
+      showView('view-reveal');
+    });
+  }
+
+  /* ---------- Bowling animation: camera follows behind the ball ---------- */
+  var W = canvas.width, H = canvas.height;
+  var PIN_POS = []; // far-end pin layout in normalized lane space
+  (function buildPins(){
+    var rows = [1,2,3,4];
+    var rowY = [0.06,0.10,0.14,0.18]; // near vanishing point
+    for (var r = 0; r < rows.length; r++){
+      var count = rows[r];
+      for (var i = 0; i < count; i++){
+        var spread = (i - (count-1)/2) * 0.09;
+        PIN_POS.push({ x: 0.5 + spread, y: rowY[r], alive:true });
+      }
+    }
+  })();
+
+  function laneXAtY(nY, edge){
+    // nY: 0 (far) .. 1 (near/camera). Lane narrows toward far end.
+    var farHalf = 0.10, nearHalf = 0.42;
+    var half = farHalf + (nearHalf - farHalf) * nY;
+    return 0.5 + edge * half;
+  }
+  function toScreen(nx, ny){
+    // perspective: y compresses toward top (far)
+    var sy = H * (0.08 + 0.86 * ny);
+    var sx = W * nx;
+    return { x: sx, y: sy };
+  }
+
+  function drawLane(pins, ballN, shakeOffset){
+    ctx.save();
+    if (shakeOffset) ctx.translate(shakeOffset.x, shakeOffset.y);
+    ctx.clearRect(-20,-20,W+40,H+40);
+
+    // sky/void behind pins
+    ctx.fillStyle = '#050506';
+    ctx.fillRect(0,0,W,H*0.12);
+
+    // lane wood
+    var farL = toScreen(laneXAtY(0,-1), 0);
+    var farR = toScreen(laneXAtY(0, 1), 0);
+    var nearL = toScreen(laneXAtY(1,-1), 1);
+    var nearR = toScreen(laneXAtY(1, 1), 1);
+    var grad = ctx.createLinearGradient(0, farL.y, 0, nearL.y);
+    grad.addColorStop(0, '#e8c07f');
+    grad.addColorStop(1, '#c9914f');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(farL.x, farL.y);
+    ctx.lineTo(farR.x, farR.y);
+    ctx.lineTo(nearR.x, nearR.y);
+    ctx.lineTo(nearL.x, nearL.y);
+    ctx.closePath();
+    ctx.fill();
+
+    // lane boards (subtle lines)
+    ctx.strokeStyle = 'rgba(120,75,25,0.35)';
+    ctx.lineWidth = 1;
+    for (var b=1; b<8; b++){
+      var t = b/8;
+      var top = toScreen(0.5 + (laneXAtY(0,-1)-0.5 + (laneXAtY(0,1)-laneXAtY(0,-1))*t), 0);
+      var bot = toScreen(0.5 + (laneXAtY(1,-1)-0.5 + (laneXAtY(1,1)-laneXAtY(1,-1))*t), 1);
+      ctx.beginPath(); ctx.moveTo(top.x, top.y); ctx.lineTo(bot.x, bot.y); ctx.stroke();
+    }
+
+    // gutters
+    ctx.fillStyle = '#123d2b';
+    var farLG = toScreen(laneXAtY(0,-1)-0.05, 0), nearLG = toScreen(laneXAtY(1,-1)-0.07, 1);
+    ctx.beginPath(); ctx.moveTo(farL.x, farL.y); ctx.lineTo(farLG.x, farLG.y);
+    ctx.lineTo(nearLG.x, nearLG.y); ctx.lineTo(nearL.x, nearL.y); ctx.closePath(); ctx.fill();
+    var farRG = toScreen(laneXAtY(0,1)+0.05, 0), nearRG = toScreen(laneXAtY(1,1)+0.07, 1);
+    ctx.beginPath(); ctx.moveTo(farR.x, farR.y); ctx.lineTo(farRG.x, farRG.y);
+    ctx.lineTo(nearRG.x, nearRG.y); ctx.lineTo(nearR.x, nearR.y); ctx.closePath(); ctx.fill();
+
+    // pins
+    pins.forEach(function(p){
+      if (!p.alive) return;
+      var pt = toScreen(p.x + (p.fx||0), Math.max(0.02, p.y + (p.fy||0)));
+        var scale = 0.5 + pt.y / H * 0.9;
+      ctx.save();
+      ctx.translate(pt.x, pt.y);
+      ctx.rotate(p.rot||0);
+      ctx.globalAlpha = p.alpha === undefined ? 1 : p.alpha;
+      ctx.fillStyle = '#f2ede2';
+      ctx.strokeStyle = '#c0392b';
+      ctx.lineWidth = 1.4 * scale;
+      var pw = 5*scale, ph = 13*scale;
+      ctx.beginPath();
+      ctx.ellipse(0, -ph*0.35, pw*0.5, ph*0.42, 0, 0, Math.PI*2);
+      ctx.fill(); ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(0, ph*0.15, pw*0.62, ph*0.5, 0, 0, Math.PI*2);
+      ctx.fill(); ctx.stroke();
+      ctx.restore();
+    });
+
+    // ball
+    if (ballN){
+      var bp = toScreen(ballN.x, ballN.y);
+      var scale = 0.35 + ballN.y * 1.1;
+      var r = 16 * scale;
+      var rg = ctx.createRadialGradient(bp.x - r*0.3, bp.y - r*0.3, r*0.1, bp.x, bp.y, r);
+      rg.addColorStop(0, '#e2131f');
+      rg.addColorStop(0.35, '#3a0508');
+      rg.addColorStop(1, '#050505');
+      ctx.fillStyle = rg;
+      ctx.beginPath();
+      ctx.ellipse(bp.x, bp.y, r, r*0.82, 0, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+
+  function runBowlingAnimation(isStrike, done){
+    var pins = PIN_POS.map(function(p){ return {x:p.x, y:p.y, alive:true, fx:0, fy:0, rot:0, alpha:1}; });
+    var duration = 1900;
+    var start = null;
+    var struck = false;
+
+    function frame(ts){
+      if (!start) start = ts;
+      var t = Math.min(1, (ts - start) / duration);
+
+      var ballN;
+      if (isStrike){
+        var wobble = Math.sin(t * Math.PI * 3) * (1 - t) * 0.02;
+        ballN = { x: 0.5 + wobble, y: 1 - t };
+        if (t > 0.82 && !struck){
+          struck = true;
+          pins.forEach(function(p){
+            p.alive = true;
+            var ang = Math.random() * Math.PI * 2;
+            p._vx = Math.cos(ang) * (0.15 + Math.random()*0.15);
+            p._vy = -0.05 - Math.random()*0.08;
+            p._vr = (Math.random()-0.5) * 12;
+          });
+          cabinet.classList.add('shake');
+          setTimeout(function(){ cabinet.classList.remove('shake'); }, 400);
+        }
+        if (struck){
+          var st = (t - 0.82) / 0.18;
+          pins.forEach(function(p){
+            p.fx = p._vx * st;
+            p.fy = p._vy * st;
+            p.rot = p._vr * st;
+            p.alpha = Math.max(0, 1 - st*1.1);
+          });
+        }
+      } else {
+        var curve = Math.pow(t, 1.6) * 0.55;
+        ballN = { x: 0.5 - curve, y: 1 - t*0.9 };
+        if (t > 0.68){ ballN = null; } // rolled into the gutter, out of view
+      }
+
+      drawLane(pins, ballN, null);
+
+      if (t < 1){
+        requestAnimationFrame(frame);
+      } else {
+        if (isStrike){
+          resultText.textContent = 'STRIKE!!';
+          resultText.className = 'result-text strike';
+        } else {
+          resultText.textContent = 'GUTTER... NEXT TIME!';
+          resultText.className = 'result-text gutter';
+        }
+        setTimeout(done, 1100);
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // initial paint so the canvas isn't blank before first play
+  drawLane(PIN_POS.map(function(p){return {x:p.x,y:p.y,alive:true};}), {x:0.5,y:0.95}, null);
+  renderScoreboard();
+  refreshFromServer();
+})();
+</script>
+
+</body>
+</html>
