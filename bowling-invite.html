@@ -373,7 +373,7 @@
   // visitor's name and RSVP is saved to one shared Google Sheet you can open
   // any time. Leave it blank and the page still works, but each friend's
   // browser only remembers their own entry — nobody sees a shared list.
-  var SYNC_ENDPOINT = '';
+  var SYNC_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwlMDfCPJ6lRLApdOY0qtKY4BA-wxwwEQ8ejafTEz3ljRENdsAPuOvIW170WyImaWM9/exec';
 
   var nameInput = document.getElementById('nameInput');
   var joinBtn = document.getElementById('joinBtn');
@@ -405,10 +405,25 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
   }
 
-  // Pulls the shared list from the Sheet (if SYNC_ENDPOINT is set) and
-  // re-renders once it arrives. Falls back to whatever is cached locally,
-  // and reports what happened in the syncStatus line so a failure is
-  // visible on the page itself, not just in the dev console.
+  // Merge the Sheet's version of the list with what's cached on this device.
+  // For each name, whichever copy has the newer timestamp wins — this means
+  // a name this device knows about but the Sheet doesn't yet (a dropped
+  // POST) is kept instead of being silently erased.
+  function mergeEntries(serverEntries){
+    var byName = {};
+    cachedEntries.forEach(function(e){ byName[e.name.toLowerCase()] = e; });
+    serverEntries.forEach(function(e){
+      var key = e.name.toLowerCase();
+      var local = byName[key];
+      if (!local || e.ts >= local.ts) byName[key] = e;
+    });
+    return Object.keys(byName).map(function(k){ return byName[k]; });
+  }
+
+  // Pulls the shared list from the Sheet (if SYNC_ENDPOINT is set), merges
+  // it with the local cache, re-renders, and quietly re-sends any entry the
+  // Sheet is missing (a previously failed push). Falls back to whatever is
+  // cached locally on a network error, and reports that on the page.
   function refreshFromServer(){
     if (!SYNC_ENDPOINT){ setSyncStatus(''); return; }
     setSyncStatus('syncing…');
@@ -417,10 +432,19 @@
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
       })
-      .then(function(entries){
-        saveCache(entries);
+      .then(function(serverEntries){
+        var onServer = {};
+        serverEntries.forEach(function(e){ onServer[e.name.toLowerCase()] = e; });
+
+        var merged = mergeEntries(serverEntries);
+        saveCache(merged);
         renderScoreboard();
         setSyncStatus('');
+
+        merged.forEach(function(e){
+          var match = onServer[e.name.toLowerCase()];
+          if (!match || match.ts < e.ts) sendEntry(e, false);
+        });
       })
       .catch(function(err){
         console.error('EGO TV RSVP sync failed:', err);
@@ -429,17 +453,27 @@
   }
 
   // text/plain avoids a CORS preflight, which Apps Script Web Apps don't
-  // handle — the .gs code parses the body as JSON regardless of header.
-  function pushToServer(entry){
+  // handle. Checks the script's own {ok:true} response — a resolved fetch
+  // isn't proof the row was actually written. chainRefresh=false is used for
+  // retries so this can't loop back into refreshFromServer on itself.
+  function sendEntry(entry, chainRefresh){
     if (!SYNC_ENDPOINT) return;
     fetch(SYNC_ENDPOINT, {
       method:'POST',
       headers:{'Content-Type':'text/plain;charset=utf-8'},
       body: JSON.stringify(entry)
-    }).then(function(){ refreshFromServer(); })
+    })
+      .then(function(r){
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function(res){
+        if (!res || res.ok !== true) throw new Error('server reported failure');
+        if (chainRefresh) refreshFromServer();
+      })
       .catch(function(err){
         console.error('EGO TV RSVP push failed:', err);
-        setSyncStatus('saved on this device only — could not reach the sheet');
+        setSyncStatus('some names may not be on the sheet yet — will retry automatically');
       });
   }
 
@@ -451,7 +485,7 @@
     entry.ts = Date.now();
     if (!existing) entries.push(entry);
     saveCache(entries);
-    pushToServer(entry);
+    sendEntry(entry, true);
     return entries;
   }
   function renderScoreboard(){
