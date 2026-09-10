@@ -373,7 +373,7 @@
   // visitor's name and RSVP is saved to one shared Google Sheet you can open
   // any time. Leave it blank and the page still works, but each friend's
   // browser only remembers their own entry — nobody sees a shared list.
-  var SYNC_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwlMDfCPJ6lRLApdOY0qtKY4BA-wxwwEQ8ejafTEz3ljRENdsAPuOvIW170WyImaWM9/exec';
+  var SYNC_ENDPOINT = '';
 
   var nameInput = document.getElementById('nameInput');
   var joinBtn = document.getElementById('joinBtn');
@@ -406,24 +406,35 @@
   }
 
   // Merge the Sheet's version of the list with what's cached on this device.
-  // For each name, whichever copy has the newer timestamp wins — this means
-  // a name this device knows about but the Sheet doesn't yet (a dropped
-  // POST) is kept instead of being silently erased.
+  // Every name from the Sheet is trusted as-is. A name this device has
+  // locally but the Sheet doesn't:
+  //  - if it was never confirmed synced yet, it's kept and retried (covers
+  //    a dropped POST — nothing gets lost before it's even landed)
+  //  - if it WAS confirmed synced before, its absence now means someone
+  //    deleted that row in the Sheet on purpose, so it's dropped here too
+  //    instead of being silently written back
   function mergeEntries(serverEntries){
     var byName = {};
-    cachedEntries.forEach(function(e){ byName[e.name.toLowerCase()] = e; });
     serverEntries.forEach(function(e){
+      byName[e.name.toLowerCase()] = { name:e.name, rsvp:e.rsvp, ts:e.ts, synced:true };
+    });
+    cachedEntries.forEach(function(e){
       var key = e.name.toLowerCase();
-      var local = byName[key];
-      if (!local || e.ts >= local.ts) byName[key] = e;
+      var onServer = byName[key];
+      if (onServer){
+        if (e.ts > onServer.ts) byName[key] = e; // a local edit newer than last sync
+      } else if (!e.synced){
+        byName[key] = e; // never confirmed — keep trying
+      }
+      // else: was synced before, now absent from the Sheet — treat as deleted
     });
     return Object.keys(byName).map(function(k){ return byName[k]; });
   }
 
   // Pulls the shared list from the Sheet (if SYNC_ENDPOINT is set), merges
-  // it with the local cache, re-renders, and quietly re-sends any entry the
-  // Sheet is missing (a previously failed push). Falls back to whatever is
-  // cached locally on a network error, and reports that on the page.
+  // it with the local cache, re-renders, and quietly re-sends anything not
+  // yet confirmed on the Sheet. Falls back to whatever is cached locally on
+  // a network error, and reports that on the page.
   function refreshFromServer(){
     if (!SYNC_ENDPOINT){ setSyncStatus(''); return; }
     setSyncStatus('syncing…');
@@ -433,23 +444,21 @@
         return r.json();
       })
       .then(function(serverEntries){
-        var onServer = {};
-        serverEntries.forEach(function(e){ onServer[e.name.toLowerCase()] = e; });
-
         var merged = mergeEntries(serverEntries);
         saveCache(merged);
         renderScoreboard();
         setSyncStatus('');
-
-        merged.forEach(function(e){
-          var match = onServer[e.name.toLowerCase()];
-          if (!match || match.ts < e.ts) sendEntry(e, false);
-        });
+        merged.forEach(function(e){ if (!e.synced) sendEntry(e, false); });
       })
       .catch(function(err){
         console.error('EGO TV RSVP sync failed:', err);
         setSyncStatus('showing names saved on this device only — sync failed');
       });
+  }
+
+  function markSynced(name){
+    var e = cachedEntries.find(function(x){ return x.name.toLowerCase() === name.toLowerCase(); });
+    if (e){ e.synced = true; saveCache(cachedEntries); }
   }
 
   // text/plain avoids a CORS preflight, which Apps Script Web Apps don't
@@ -469,6 +478,7 @@
       })
       .then(function(res){
         if (!res || res.ok !== true) throw new Error('server reported failure');
+        markSynced(entry.name);
         if (chainRefresh) refreshFromServer();
       })
       .catch(function(err){
@@ -480,9 +490,10 @@
   function upsertEntry(name, rsvp){
     var entries = cachedEntries.slice();
     var existing = entries.find(function(e){ return e.name.toLowerCase() === name.toLowerCase(); });
-    var entry = existing || { name:name, rsvp:rsvp, ts:Date.now() };
+    var entry = existing || { name:name, rsvp:rsvp, ts:Date.now(), synced:false };
     entry.rsvp = rsvp;
     entry.ts = Date.now();
+    entry.synced = false; // any local edit needs re-confirming with the Sheet
     if (!existing) entries.push(entry);
     saveCache(entries);
     sendEntry(entry, true);
