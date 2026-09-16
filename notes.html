@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes — EGO TV</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--red:#FF1A1A;--black:#000;--white:#f5f5f0;--gray:#888;--mono:'Space Mono',monospace;--display:'Bebas Neue',sans-serif;--hand:'Caveat',cursive;}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--white);font-family:var(--mono);cursor:crosshair;overflow-x:hidden;}
+::selection{background:var(--red);color:var(--black);}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:999;opacity:0.3;mix-blend-mode:overlay;}
+
+.top{display:flex;justify-content:space-between;align-items:center;padding:1.75rem 2.5rem;border-bottom:1px solid rgba(255,26,26,0.12);flex-wrap:wrap;gap:1rem;}
+.top-title{font-family:var(--display);font-size:1.4rem;letter-spacing:0.1em;}
+.top-title span{color:var(--red);}
+.top-center{display:flex;gap:0.5rem;}
+.view-btn{background:none;border:none;font-family:var(--mono);font-size:0.5rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gray);cursor:crosshair;padding:0.3rem 0.5rem;transition:color 0.2s,border-color 0.2s;border-bottom:1px solid transparent;}
+.view-btn:hover{color:rgba(255,255,255,0.7);}
+.view-btn.active{color:var(--red);border-bottom-color:var(--red);}
+.top-links{display:flex;gap:1.5rem;}
+.top-links a{font-size:0.5rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gray);text-decoration:none;transition:color 0.2s;}
+.top-links a:hover{color:var(--red);}
+
+.wrap{max-width:680px;margin:0 auto;padding:4rem 2rem 6rem;}
+.wrap-intro{margin-bottom:3.5rem;}
+.wrap-eyebrow{font-size:0.55rem;letter-spacing:0.35em;text-transform:uppercase;color:var(--red);margin-bottom:1rem;display:flex;align-items:center;gap:0.75rem;}
+.wrap-eyebrow::before{content:'';width:24px;height:1px;background:var(--red);}
+.wrap-title{font-family:var(--display);font-size:clamp(2.5rem,6vw,3.5rem);line-height:1;margin-bottom:1rem;}
+.wrap-sub{font-size:0.65rem;line-height:2;color:rgba(255,255,255,0.45);max-width:480px;}
+
+.entry{padding:2.25rem 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+.entry-meta{display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;}
+.entry-date{font-size:0.55rem;letter-spacing:0.1em;color:rgba(255,255,255,0.35);}
+.entry-tag{font-size:0.47rem;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid rgba(255,26,26,0.3);color:var(--red);}
+.entry-title{font-family:var(--display);font-size:1.7rem;letter-spacing:0.03em;margin-bottom:0.9rem;line-height:1.05;}
+.entry-body{font-size:0.68rem;line-height:2;color:rgba(255,255,255,0.6);letter-spacing:0.02em;}
+.entry-body p{margin-bottom:1rem;}
+.entry-body p:last-child{margin-bottom:0;}
+.entry-body code{background:rgba(255,26,26,0.08);color:var(--red);padding:1px 5px;font-size:0.9em;}
+.empty{text-align:center;padding:5rem 0;color:rgba(255,255,255,0.3);font-size:0.65rem;letter-spacing:0.05em;}
+
+.journal{max-width:920px;margin:0 auto;padding:3.5rem 2rem 4rem;}
+.journal-intro{margin-bottom:2.5rem;}
+.journal-hint{font-size:0.62rem;line-height:1.8;color:rgba(255,255,255,0.35);margin-top:0.75rem;}
+.journal-book{display:flex;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.015);}
+.journal-page{flex:1;padding:2.25rem 2rem;min-width:0;}
+.journal-page + .journal-page{border-left:1px solid rgba(255,26,26,0.15);}
+.page-editable{outline:none;font-family:var(--hand);font-size:1.5rem;line-height:2rem;color:var(--white);min-height:400px;max-height:400px;overflow-y:auto;cursor:text;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(2rem - 1px),rgba(255,255,255,0.12) calc(2rem - 1px),rgba(255,255,255,0.12) 2rem);}
+.page-editable:focus{background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(2rem - 1px),rgba(255,26,26,0.28) calc(2rem - 1px),rgba(255,26,26,0.28) 2rem);}
+.journal-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem;}
+.page-arrow{background:none;border:1px solid rgba(255,255,255,0.15);color:var(--white);width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:crosshair;transition:border-color 0.2s,color 0.2s;font-family:var(--mono);font-size:0.9rem;}
+.page-arrow:hover{border-color:var(--red);color:var(--red);}
+.page-arrow:disabled{opacity:0.2;cursor:default;}
+.page-arrow:disabled:hover{border-color:rgba(255,255,255,0.15);color:var(--white);}
+.page-indicator{font-size:0.55rem;letter-spacing:0.15em;color:rgba(255,255,255,0.35);text-transform:uppercase;}
+
+@media(max-width:640px){
+  .journal-book{flex-direction:column;}
+  .journal-page + .journal-page{border-left:none;border-top:1px solid rgba(255,26,26,0.15);}
+  .page-editable{min-height:220px;max-height:220px;}
+  .top{justify-content:center;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="top-title">ego<span>notes</span></div>
+  <div class="top-center">
+    <button class="view-btn" data-view="journal">Journal</button>
+    <button class="view-btn" data-view="list">List</button>
+  </div>
+  <div class="top-links">
+    <a href="/">Site</a>
+    <a href="/api/logout">Log out</a>
+  </div>
+</div>
+
+<div class="journal" id="journalView">
+  <div class="journal-intro">
+    <div class="wrap-eyebrow">Private</div>
+    <h1 class="wrap-title" style="font-size:2.4rem;">Journal</h1>
+    <p class="journal-hint">Tap into either page and write. Saved automatically in this browser only — it won't show up if you open this on another device.</p>
+  </div>
+  <div class="journal-book">
+    <div class="journal-page">
+      <div class="page-editable" id="leftPage" contenteditable="true" spellcheck="false"></div>
+    </div>
+    <div class="journal-page">
+      <div class="page-editable" id="rightPage" contenteditable="true" spellcheck="false"></div>
+    </div>
+  </div>
+  <div class="journal-nav">
+    <button class="page-arrow" id="prevPage" aria-label="Previous page">&larr;</button>
+    <span class="page-indicator" id="pageIndicator">Page 1 of 1</span>
+    <button class="page-arrow" id="nextPage" aria-label="Next page">&rarr;</button>
+  </div>
+</div>
+
+<div class="wrap" id="listView" style="display:none;">
+  <div class="wrap-intro">
+    <div class="wrap-eyebrow">Private</div>
+    <h1 class="wrap-title">Notes</h1>
+    <p class="wrap-sub">TouchDesigner, Blender, DaVinci Fusion. Whatever I'm learning, in my own words, while I figure it out.</p>
+  </div>
+  <div id="entries"></div>
+</div>
+
+<script>
+// ===== View toggle (remembers last choice) =====
+const viewBtns = document.querySelectorAll('.view-btn');
+const journalView = document.getElementById('journalView');
+const listView = document.getElementById('listView');
+
+function setView(view) {
+  localStorage.setItem('ego_notes_view', view);
+  viewBtns.forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  journalView.style.display = view === 'journal' ? '' : 'none';
+  listView.style.display = view === 'list' ? '' : 'none';
+}
+
+viewBtns.forEach(btn => btn.addEventListener('click', () => setView(btn.dataset.view)));
+setView(localStorage.getItem('ego_notes_view') || 'journal');
+
+// ===== List view — dated/tagged entries =====
+// Add new entries here — newest first is handled automatically.
+const ENTRIES = [
+  // {
+  //   date: '2026-09-16',
+  //   tag: 'TouchDesigner',
+  //   title: 'First real entry',
+  //   body: `<p>Write in plain HTML paragraphs here. Use &lt;code&gt;like this&lt;/code&gt; for technical terms.</p>`
+  // },
+];
+
+const entriesContainer = document.getElementById('entries');
+
+if (ENTRIES.length === 0) {
+  entriesContainer.innerHTML = '<div class="empty">Nothing here yet. Add your first entry to the ENTRIES array in this file.</div>';
+} else {
+  const sorted = [...ENTRIES].sort((a, b) => new Date(b.date) - new Date(a.date));
+  entriesContainer.innerHTML = sorted.map(entry => `
+    <div class="entry">
+      <div class="entry-meta">
+        <span class="entry-date">${new Date(entry.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+        <span class="entry-tag">${entry.tag}</span>
+      </div>
+      <h2 class="entry-title">${entry.title}</h2>
+      <div class="entry-body">${entry.body}</div>
+    </div>
+  `).join('');
+}
+
+// ===== Journal view — page-by-page book, saved to localStorage =====
+const PAGES_KEY = 'ego_journal_pages';
+const INDEX_KEY = 'ego_journal_page_index';
+
+function loadPages() {
+  try {
+    const raw = localStorage.getItem(PAGES_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+  } catch (e) {}
+  return [{ left: '', right: '' }];
+}
+
+let pages = loadPages();
+let currentIndex = Math.min(
+  Math.max(0, parseInt(localStorage.getItem(INDEX_KEY) || '0', 10)),
+  pages.length - 1
+);
+
+const leftPage = document.getElementById('leftPage');
+const rightPage = document.getElementById('rightPage');
+const prevBtn = document.getElementById('prevPage');
+const nextBtn = document.getElementById('nextPage');
+const pageIndicator = document.getElementById('pageIndicator');
+
+function savePages() {
+  localStorage.setItem(PAGES_KEY, JSON.stringify(pages));
+  localStorage.setItem(INDEX_KEY, String(currentIndex));
+}
+
+function renderSpread() {
+  leftPage.innerHTML = pages[currentIndex].left || '';
+  rightPage.innerHTML = pages[currentIndex].right || '';
+  pageIndicator.textContent = `Page ${currentIndex + 1} of ${pages.length}`;
+  prevBtn.disabled = currentIndex === 0;
+}
+
+// Enter creates a plain line break instead of a new block element,
+// so line spacing stays locked to the ruled lines behind the text.
+function insertLineBreak() {
+  let handled = false;
+  if (document.execCommand) {
+    handled = document.execCommand('insertLineBreak');
+  }
+  if (!handled) {
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    range.deleteContents();
+    const br = document.createElement('br');
+    range.insertNode(br);
+    range.setStartAfter(br);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+}
+
+function handleEnter(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    insertLineBreak();
+  }
+}
+
+leftPage.addEventListener('keydown', handleEnter);
+rightPage.addEventListener('keydown', handleEnter);
+
+leftPage.addEventListener('input', () => {
+  pages[currentIndex].left = leftPage.innerHTML;
+  savePages();
+});
+
+rightPage.addEventListener('input', () => {
+  pages[currentIndex].right = rightPage.innerHTML;
+  savePages();
+});
+
+prevBtn.addEventListener('click', () => {
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderSpread();
+    savePages();
+  }
+});
+
+nextBtn.addEventListener('click', () => {
+  if (currentIndex === pages.length - 1) {
+    pages.push({ left: '', right: '' });
+  }
+  currentIndex++;
+  renderSpread();
+  savePages();
+});
+
+renderSpread();
+</script>
+
+</body>
+</html>
